@@ -11,20 +11,13 @@ import {
   FaPlus,
   FaTimes,
   FaGripVertical,
-  FaSearch,
   FaEdit,
   FaCheck,
   FaFileAlt,
   FaUser,
 } from "react-icons/fa";
-import {
-  useLazySearchSongsQuery,
-  useFetchSongLyricsMutation,
-} from "../slices/gamesApiSlice";
-import {
-  useLazySearchLyricsQuery,
-  useAddLyricsMutation,
-} from "../slices/lyricsApiSlice";
+import { useLazySearchSongsQuery } from "../slices/gamesApiSlice";
+// Removed lyricsApiSlice imports - no more auto-searching
 import LyricsInputModal from "./LyricsInput/LyricsInputModal";
 import {
   DndContext,
@@ -267,31 +260,7 @@ const SortableSongItem = React.memo(
               >
                 <FaFileAlt size={14} />
               </button>
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  onFetchLyrics(index);
-                }}
-                disabled={isFetchingLyrics}
-                className={`p-2 ${
-                  isFetchingLyrics
-                    ? "text-blue-400 cursor-wait"
-                    : "text-purple-600 hover:text-purple-800"
-                }`}
-                title={
-                  isFetchingLyrics
-                    ? "Fetching lyrics..."
-                    : "Auto-fetch lyrics from web"
-                }
-              >
-                {isFetchingLyrics ? (
-                  <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-purple-600"></div>
-                ) : (
-                  <FaSearch size={14} />
-                )}
-              </button>
+              {/* Removed auto-fetch lyrics button */}
               <button
                 type="button"
                 onClick={(e) => {
@@ -328,19 +297,16 @@ const SongSearchInput = ({ onSongSelect, selectedSongs = [] }) => {
   const [editingLyricsIndex, setEditingLyricsIndex] = useState(null);
   const [editingLyrics, setEditingLyrics] = useState("");
 
-  // State for lyrics fetching
-  const [fetchingLyricsFor, setFetchingLyricsFor] = useState(null);
-  const [lyricsMessage, setLyricsMessage] = useState(null); // הודעה על מצב חיפוש מילות השיר
+  // State for lyrics fetching - removed auto-search functionality
 
   // State for lyrics input modal
   const [showLyricsInputModal, setShowLyricsInputModal] = useState(false);
   const [currentSongForLyrics, setCurrentSongForLyrics] = useState(null);
 
   const [searchSongs, { isLoading }] = useLazySearchSongsQuery();
-  const [fetchSongLyrics, { isLoading: isFetchingLyrics }] =
-    useFetchSongLyricsMutation();
-  const [searchLyricsInDatabase] = useLazySearchLyricsQuery();
-  const [addLyricsToDatabase] = useAddLyricsMutation();
+  // Removed fetchSongLyrics - no more auto-searching
+  // Removed searchLyricsInDatabase - no more auto-searching
+  // Removed addLyricsToDatabase - no more auto-searching
 
   // הגדרת סנסורים לגרירה - מותאמים לביצועים טובים יותר
   const sensors = useSensors(
@@ -502,72 +468,9 @@ const SongSearchInput = ({ onSongSelect, selectedSongs = [] }) => {
   };
 
   // פונקציה לחיפוש מילות שיר במאגר
-  const fetchLyricsForSong = useCallback(
-    async (trackId, title, artist) => {
-      try {
-        setFetchingLyricsFor(`${title} - ${artist}`);
-        console.log(
-          `🔍 Searching lyrics database for: "${title}" by "${artist}" (trackId: ${trackId})`
-        );
+  // Removed fetchLyricsForSong function - no more auto-searching for lyrics
 
-        const result = await searchLyricsInDatabase({
-          trackId,
-          title,
-          artist,
-        }).unwrap();
-
-        if (result.success && result.found && result.data.lyrics) {
-          console.log(
-            `✅ Found lyrics in database for: "${title}" by "${artist}"`
-          );
-          return {
-            lyrics: result.data.lyrics,
-            lyricsKeywords: result.data.keywords || [],
-            source: result.data.source,
-          };
-        } else {
-          console.log(
-            `❌ No lyrics found in database for: "${title}" by "${artist}"`
-          );
-
-          // הצגת הודעה למשתמש שהמילות לא נמצאו במאגר
-          setLyricsMessage({
-            type: "info",
-            text: `Lyrics not found in our database. Click "Add Lyrics" to help build our community database! 🎵`,
-            songTitle: `${title} - ${artist}`,
-            showAddButton: true,
-            songData: { trackId, title, artist },
-          });
-
-          // הסתרת ההודעה אחרי 10 שניות
-          setTimeout(() => setLyricsMessage(null), 10000);
-          return null;
-        }
-      } catch (error) {
-        console.error(
-          `❌ Error searching lyrics database for "${title}" by "${artist}":`,
-          error
-        );
-
-        setLyricsMessage({
-          type: "error",
-          text: "Error searching lyrics database. Please try again or add lyrics manually.",
-          songTitle: `${title} - ${artist}`,
-          showAddButton: true,
-          songData: { trackId, title, artist },
-        });
-
-        // הסתרת ההודעה אחרי 8 שניות
-        setTimeout(() => setLyricsMessage(null), 8000);
-        return null;
-      } finally {
-        setFetchingLyricsFor(null);
-      }
-    },
-    [searchLyricsInDatabase]
-  );
-
-  // בחירת שיר - עם חיפוש מילות שיר אוטומטי
+  // בחירת שיר - ללא חיפוש מילות שיר אוטומטי
   const selectSong = async (song) => {
     const correctAnswers = generateCorrectAnswers(
       song.trackName,
@@ -674,12 +577,10 @@ const SongSearchInput = ({ onSongSelect, selectedSongs = [] }) => {
         ],
         hello: ["hello", "its", "me", "wondering", "after", "years"],
         despacito: ["despacito", "quiero", "respirar", "cuello", "despacio"],
-        "shape of you": ["shape", "of", "you", "love", "body", "crazy"],
       };
 
       // בדיקה אם יש מילות מפתח ידניות לשיר הזה
       const normalizedTitle = trackName.toLowerCase().trim();
-      const normalizedArtist = artistName.toLowerCase().trim();
 
       // חיפוש במילות מפתח ידניות
       for (const [songKey, lyricsWords] of Object.entries(manualLyrics)) {
@@ -763,31 +664,10 @@ const SongSearchInput = ({ onSongSelect, selectedSongs = [] }) => {
       fullLyrics: "", // נתחיל עם ריק
     };
 
-    // ניסיון לחיפוש מילות שיר אוטומטי
-    try {
-      const lyricsResult = await fetchLyricsForSong(
-        song.trackId,
-        song.trackName,
-        song.artistName
-      );
-      if (lyricsResult) {
-        songData.lyrics = lyricsResult.lyrics;
-        songData.fullLyrics = lyricsResult.lyrics;
-        songData.lyricsKeywords =
-          lyricsResult.lyricsKeywords.length > 0
-            ? lyricsResult.lyricsKeywords
-            : lyricsKeywords; // fallback למילות מפתח ידניות
-        console.log(
-          `✅ Added song with web-scraped lyrics: "${song.trackName}"`
-        );
-      } else {
-        console.log(
-          `ℹ️ Added song without lyrics (will use manual entry): "${song.trackName}"`
-        );
-      }
-    } catch (error) {
-      console.error(`⚠️ Error fetching lyrics for "${song.trackName}":`, error);
-    }
+    // Removed automatic lyrics searching - user will add lyrics manually if needed
+    console.log(
+      `ℹ️ Added song without automatic lyrics search: "${song.trackName}"`
+    );
 
     onSongSelect(songData);
     // לא מוחקים את החיפוש כדי שהמשתמש יוכל להוסיף עוד שירים
@@ -895,47 +775,7 @@ const SongSearchInput = ({ onSongSelect, selectedSongs = [] }) => {
     setEditingLyrics("");
   }, []);
 
-  // פונקציה לחיפוש מילות שיר לשיר קיים
-  const fetchLyricsForExistingSong = useCallback(
-    async (index) => {
-      const song = selectedSongs[index];
-      if (!song) return;
-
-      try {
-        const lyricsResult = await fetchLyricsForSong(
-          song.trackId,
-          song.title,
-          song.artist
-        );
-        if (lyricsResult) {
-          const updatedSongs = selectedSongs.map((s, i) => {
-            if (i === index) {
-              return {
-                ...s,
-                lyrics: lyricsResult.lyrics,
-                fullLyrics: lyricsResult.lyrics,
-                lyricsKeywords:
-                  lyricsResult.lyricsKeywords.length > 0
-                    ? lyricsResult.lyricsKeywords
-                    : s.lyricsKeywords, // fallback למילות מפתח קיימות
-              };
-            }
-            return s;
-          });
-          onSongSelect(updatedSongs, true);
-          console.log(
-            `✅ Updated existing song with web-scraped lyrics: "${song.title}"`
-          );
-        }
-      } catch (error) {
-        console.error(
-          `⚠️ Error fetching lyrics for existing song "${song.title}":`,
-          error
-        );
-      }
-    },
-    [selectedSongs, onSongSelect, fetchLyricsForSong]
-  );
+  // Removed fetchLyricsForExistingSong function - no more auto-searching for lyrics
 
   // רשימת IDs של השירים - מאופטמת
   const songIds = useMemo(
@@ -943,11 +783,7 @@ const SongSearchInput = ({ onSongSelect, selectedSongs = [] }) => {
     [selectedSongs]
   );
 
-  // פונקציה לפתיחת מודל הוספת מילות שיר
-  const openLyricsInputModal = useCallback((songData) => {
-    setCurrentSongForLyrics(songData);
-    setShowLyricsInputModal(true);
-  }, []);
+  // Removed openLyricsInputModal - no more auto-searching
 
   // פונקציה לטיפול בהוספת מילות שיר למאגר
   const handleLyricsAdded = useCallback(
@@ -978,8 +814,7 @@ const SongSearchInput = ({ onSongSelect, selectedSongs = [] }) => {
         }
       }
 
-      // הסתרת הודעת השגיאה אם קיימת
-      setLyricsMessage(null);
+      // Clear current song for lyrics
       setCurrentSongForLyrics(null);
     },
     [currentSongForLyrics, selectedSongs, onSongSelect]
@@ -1024,74 +859,9 @@ const SongSearchInput = ({ onSongSelect, selectedSongs = [] }) => {
         </div>
       </div>
 
-      {/* אינדיקטור טעינה למילות שיר */}
-      {fetchingLyricsFor && (
-        <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-          <div className="flex items-center">
-            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mr-2"></div>
-            <span className="text-blue-700 text-sm">
-              🎵 Fetching lyrics for: {fetchingLyricsFor}...
-            </span>
-          </div>
-        </div>
-      )}
+      {/* Removed lyrics fetching indicator - no more auto-searching */}
 
-      {/* הודעה על מצב חיפוש מילות השיר */}
-      {lyricsMessage && (
-        <div
-          className={`mb-4 p-4 rounded-lg border ${
-            lyricsMessage.type === "error"
-              ? "bg-red-50 border-red-200 text-red-800"
-              : lyricsMessage.type === "info"
-              ? "bg-blue-50 border-blue-200 text-blue-800"
-              : "bg-yellow-50 border-yellow-200 text-yellow-800"
-          }`}
-        >
-          <div className="flex items-start justify-between">
-            <div className="flex-1">
-              <div className="flex items-center mb-2">
-                <span className="text-lg mr-2">
-                  {lyricsMessage.type === "error"
-                    ? "❌"
-                    : lyricsMessage.type === "info"
-                    ? "ℹ️"
-                    : "⚠️"}
-                </span>
-                <span className="font-semibold text-sm">
-                  {lyricsMessage.songTitle}
-                </span>
-              </div>
-              <p className="text-sm leading-relaxed">{lyricsMessage.text}</p>
-
-              {/* כפתור הוספת מילות שיר */}
-              {lyricsMessage.showAddButton && lyricsMessage.songData && (
-                <div className="mt-3">
-                  <button
-                    onClick={() => openLyricsInputModal(lyricsMessage.songData)}
-                    className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white text-sm font-medium rounded-md hover:from-purple-700 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition-all"
-                  >
-                    <FaPlus className="mr-2" size={12} />
-                    Add Lyrics to Database
-                  </button>
-                </div>
-              )}
-
-              <p className="text-xs mt-2 opacity-75">
-                💡 Click the{" "}
-                <FaFileAlt className="inline mx-1 text-green-600" /> button next
-                to the song to paste the lyrics manually for this game only
-              </p>
-            </div>
-            <button
-              onClick={() => setLyricsMessage(null)}
-              className="text-gray-500 hover:text-gray-700 p-1 ml-2"
-              title="Close message"
-            >
-              <FaTimes size={14} />
-            </button>
-          </div>
-        </div>
-      )}
+      {/* Removed lyrics message display - no more auto-searching */}
 
       {/* תוצאות חיפוש */}
       {showResults && (
@@ -1154,34 +924,19 @@ const SongSearchInput = ({ onSongSelect, selectedSongs = [] }) => {
                         e.stopPropagation();
                         selectSong(song);
                       }}
-                      disabled={
-                        isSongSelected(song.trackId) ||
-                        fetchingLyricsFor ===
-                          `${song.trackName} - ${song.artistName}`
-                      }
+                      disabled={isSongSelected(song.trackId)}
                       className={`p-2 rounded-full transition-colors ${
                         isSongSelected(song.trackId)
                           ? "text-gray-400 cursor-not-allowed"
-                          : fetchingLyricsFor ===
-                            `${song.trackName} - ${song.artistName}`
-                          ? "text-blue-400 cursor-wait"
                           : "text-green-600 hover:bg-green-50"
                       }`}
                       title={
                         isSongSelected(song.trackId)
                           ? "Already selected"
-                          : fetchingLyricsFor ===
-                            `${song.trackName} - ${song.artistName}`
-                          ? "Fetching lyrics..."
-                          : "Select song (will auto-fetch lyrics)"
+                          : "Select song"
                       }
                     >
-                      {fetchingLyricsFor ===
-                      `${song.trackName} - ${song.artistName}` ? (
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
-                      ) : (
-                        <FaPlus size={16} />
-                      )}
+                      <FaPlus size={16} />
                     </button>
                   </div>
                 </div>
@@ -1208,9 +963,7 @@ const SongSearchInput = ({ onSongSelect, selectedSongs = [] }) => {
               title • Click <FaUser className="inline mx-1 text-purple-600" />{" "}
               to edit artist • Click{" "}
               <FaFileAlt className="inline mx-1 text-green-600" /> to edit
-              lyrics • Click{" "}
-              <FaSearch className="inline mx-1 text-purple-600" /> to auto-fetch
-              lyrics
+              lyrics manually
             </p>
           </div>
 
@@ -1233,10 +986,8 @@ const SongSearchInput = ({ onSongSelect, selectedSongs = [] }) => {
                     onEdit={editSong}
                     onEditArtist={editArtist}
                     onEditLyrics={openLyricsModal}
-                    onFetchLyrics={fetchLyricsForExistingSong}
-                    isFetchingLyrics={
-                      fetchingLyricsFor === `${song.title} - ${song.artist}`
-                    }
+                    onFetchLyrics={null} // Removed auto-fetch functionality
+                    isFetchingLyrics={false} // No more fetching
                   />
                 ))}
               </div>
