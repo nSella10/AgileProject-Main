@@ -127,23 +127,8 @@
     "team": {
       "omri": {
         "name": "Omri Peer",
-        "role": "Senior Fullstack Developer, DevOps, DBA",
-        "bio": "Expert in full-stack development with extensive experience in DevOps and database administration"
-      },
-      "ori": {
-        "name": "Ori Katz",
-        "role": "Scrum Master, UX/UI Designer",
-        "bio": "Passionate about creating intuitive user experiences and leading agile development processes"
-      },
-      "robert": {
-        "name": "Robert Ifraimov",
-        "role": "Product Owner, QA Engineer",
-        "bio": "Focused on product strategy and ensuring the highest quality standards in our applications"
-      },
-      "noam": {
-        "name": "Noam Sella",
-        "role": "Technical Writer, System Architect",
-        "bio": "Specializes in system architecture design and creating comprehensive technical documentation"
+        "role": "Lead Developer & System Architect",
+        "bio": "Solo developer responsible for all aspects of the system - full-stack development, DevOps, database administration, UI/UX design, quality assurance, and product management"
       }
     },
     "our_values": "Our Values",
@@ -564,23 +549,8 @@
     "team_members": [
       {
         "name": "Omri Peer",
-        "role": "Senior Fullstack Developer, DevOps, DBA",
-        "description": "Leads technical development and cloud infrastructure"
-      },
-      {
-        "name": "Ori Katz",
-        "role": "Scrum Master, UX/UI",
-        "description": "Manages development processes and experience design"
-      },
-      {
-        "name": "Robert Ifraimov",
-        "role": "Product Owner, QA Engineer",
-        "description": "Defines product vision and ensures quality"
-      },
-      {
-        "name": "Noam Sella",
-        "role": "Technical Writer, System Architect",
-        "description": "Designs architecture and documents the system"
+        "role": "Lead Developer & System Architect",
+        "description": "Solo developer handling all aspects of development, infrastructure, design, and product management"
       }
     ],
     "get_in_touch": "Get in Touch",

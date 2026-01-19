@@ -49,31 +49,13 @@ const AboutPage = () => {
           <h2 className="text-3xl font-bold text-center mb-12">
             {t("about.leadership_team")}
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-1 gap-8 max-w-md mx-auto">
             {[
               {
                 name: t("about.team.omri.name"),
                 role: t("about.team.omri.role"),
                 bio: t("about.team.omri.bio"),
                 initials: "OP",
-              },
-              {
-                name: t("about.team.ori.name"),
-                role: t("about.team.ori.role"),
-                bio: t("about.team.ori.bio"),
-                initials: "OK",
-              },
-              {
-                name: t("about.team.robert.name"),
-                role: t("about.team.robert.role"),
-                bio: t("about.team.robert.bio"),
-                initials: "RI",
-              },
-              {
-                name: t("about.team.noam.name"),
-                role: t("about.team.noam.role"),
-                bio: t("about.team.noam.bio"),
-                initials: "NS",
               },
             ].map((member, idx) => (
               <div
