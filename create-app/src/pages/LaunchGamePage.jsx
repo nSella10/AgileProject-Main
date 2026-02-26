@@ -57,6 +57,15 @@ const LaunchGamePage = () => {
   const audioRef = useRef(null);
   const countdownRef = useRef(null);
   const roomCodeRef = useRef("");
+  // Mirror of sharedAudioRef state kept in a ref so socket handlers registered
+  // inside useEffect([gameId, navigate, userInfo]) can read the current value
+  // without stale closure issues.
+  const sharedAudioMirrorRef = useRef(null);
+
+  // Keep the mirror in sync whenever the state changes.
+  useEffect(() => {
+    sharedAudioMirrorRef.current = sharedAudioRef;
+  }, [sharedAudioRef]);
 
   useEffect(() => {
     console.log("🎮 LaunchGamePage useEffect - gameId:", gameId);
@@ -137,11 +146,14 @@ const LaunchGamePage = () => {
         }
 
         // עצירה ונקיון של השמע המשותף (מהמסכים הקודמים)
-        if (sharedAudioRef) {
+        // Use sharedAudioMirrorRef.current — sharedAudioRef itself is stale inside
+        // this useEffect([gameId, navigate, userInfo]) closure.
+        if (sharedAudioMirrorRef.current) {
           console.log(`🛑 Next round - stopping shared audio IMMEDIATELY`);
-          sharedAudioRef.onended = null; // הסרת event listener
-          sharedAudioRef.pause();
-          sharedAudioRef.currentTime = 0;
+          sharedAudioMirrorRef.current.onended = null; // הסרת event listener
+          sharedAudioMirrorRef.current.pause();
+          sharedAudioMirrorRef.current.currentTime = 0;
+          sharedAudioMirrorRef.current = null;
           setSharedAudioRef(null);
         }
 
@@ -153,8 +165,12 @@ const LaunchGamePage = () => {
         console.log(`🎵 Loading audio: ${fullAudioUrl}`);
         console.log(`⏱️ Expected duration: ${duration}ms`);
 
-        const newAudio = new Audio(fullAudioUrl);
+        // crossOrigin MUST be set before src — setting it after the constructor
+        // causes the browser to cancel the in-flight request and restart with CORS,
+        // adding latency on the first round.
+        const newAudio = new Audio();
         newAudio.crossOrigin = "anonymous";
+        newAudio.src = fullAudioUrl;
         newAudio.preload = "auto";
         newAudio.volume = 1.0; // וודא שהעוצמה מלאה
 
@@ -437,13 +453,27 @@ const LaunchGamePage = () => {
           });
         };
 
-        // ניסיון השמעה מיידי ואחרי טעינה
+        // Guard flag: prevents two concurrent play paths (the 10ms immediate attempt
+        // and the waitForLoad backup) from both calling play() and creating duplicate
+        // stop-timers or double-emitting audioStarted/audioEnded.
+        let playInitiated = false;
+
         const attemptPlay = () => {
+          if (playInitiated) {
+            console.log("⚠️ Play already initiated, skipping duplicate attempt");
+            return;
+          }
+          playInitiated = true;
+
           playAudioWithTimer().catch((error) => {
             console.warn(`⚠️ Play attempt failed: ${error.message}`);
+            playInitiated = false; // allow the retry below
 
             // ניסיון נוסף אחרי השהיה קצרה
             setTimeout(() => {
+              if (playInitiated) return;
+              playInitiated = true;
+
               playAudioWithTimer().catch((retryError) => {
                 console.error(
                   `❌ Retry play also failed: ${retryError.message}`
@@ -528,11 +558,12 @@ const LaunchGamePage = () => {
         }
 
         // עצירת השמע המשותף כשהסיבוב מצליח
-        if (sharedAudioRef) {
+        if (sharedAudioMirrorRef.current) {
           console.log(`🎉 Round succeeded - stopping shared audio`);
-          sharedAudioRef.onended = null; // הסרת event listener
-          sharedAudioRef.pause();
-          sharedAudioRef.currentTime = 0;
+          sharedAudioMirrorRef.current.onended = null; // הסרת event listener
+          sharedAudioMirrorRef.current.pause();
+          sharedAudioMirrorRef.current.currentTime = 0;
+          sharedAudioMirrorRef.current = null;
           setSharedAudioRef(null);
         }
       }
@@ -569,11 +600,12 @@ const LaunchGamePage = () => {
         }
 
         // עצירת השמע המשותף כשהסיבוב נכשל
-        if (sharedAudioRef) {
+        if (sharedAudioMirrorRef.current) {
           console.log(`❌ Round failed - stopping shared audio`);
-          sharedAudioRef.onended = null; // הסרת event listener
-          sharedAudioRef.pause();
-          sharedAudioRef.currentTime = 0;
+          sharedAudioMirrorRef.current.onended = null; // הסרת event listener
+          sharedAudioMirrorRef.current.pause();
+          sharedAudioMirrorRef.current.currentTime = 0;
+          sharedAudioMirrorRef.current = null;
           setSharedAudioRef(null);
         }
 
@@ -610,11 +642,12 @@ const LaunchGamePage = () => {
       }
 
       // עצירת השמע המשותף כשמחכים להחלטת המארגן
-      if (sharedAudioRef) {
+      if (sharedAudioMirrorRef.current) {
         console.log(`🤔 Awaiting decision - stopping shared audio`);
-        sharedAudioRef.onended = null; // הסרת event listener
-        sharedAudioRef.pause();
-        sharedAudioRef.currentTime = 0;
+        sharedAudioMirrorRef.current.onended = null; // הסרת event listener
+        sharedAudioMirrorRef.current.pause();
+        sharedAudioMirrorRef.current.currentTime = 0;
+        sharedAudioMirrorRef.current = null;
         setSharedAudioRef(null);
       }
     });
@@ -631,11 +664,12 @@ const LaunchGamePage = () => {
         audioRef.current = null;
       }
 
-      if (sharedAudioRef) {
+      if (sharedAudioMirrorRef.current) {
         console.log(`🏁 Game over - stopping shared audio`);
-        sharedAudioRef.onended = null; // הסרת event listener
-        sharedAudioRef.pause();
-        sharedAudioRef.currentTime = 0;
+        sharedAudioMirrorRef.current.onended = null; // הסרת event listener
+        sharedAudioMirrorRef.current.pause();
+        sharedAudioMirrorRef.current.currentTime = 0;
+        sharedAudioMirrorRef.current = null;
         setSharedAudioRef(null);
       }
 
@@ -884,6 +918,10 @@ const LaunchGamePage = () => {
   const handleStartGame = () => {
     console.log("🚀 Starting game with roomCode:", roomCode);
     console.log("🚀 Current guessTimeLimit state:", guessTimeLimit);
+    // This click IS a user gesture — use it to pre-unlock the browser's autoplay
+    // policy so that the subsequent play() call inside the socket event handler succeeds.
+    const unlock = new Audio();
+    unlock.play().catch(() => {});
     const socket = getSocket();
     socket.emit("startGame", { roomCode });
   };

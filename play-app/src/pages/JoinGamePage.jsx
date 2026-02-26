@@ -49,6 +49,15 @@ const JoinGamePage = () => {
   const timerInterval = useRef(null);
   const isCheckingRef = useRef(false); // עוקב אחרי האם אנחנו בתהליך בדיקה
   const lastCheckTimeRef = useRef(0); // זמן הבדיקה האחרונה
+  // Mirrors of state values for reading inside socket handlers registered with
+  // empty deps (useEffect([], [])). Without these, handlers always see the
+  // initial (stale) value of state variables captured at registration time.
+  const joinedRef = useRef(false);
+  const showRejoinModalRef = useRef(false);
+
+  // Keep mirrors in sync with state.
+  useEffect(() => { joinedRef.current = joined; }, [joined]);
+  useEffect(() => { showRejoinModalRef.current = showRejoinModal; }, [showRejoinModal]);
 
   // פונקציה לבדיקת משחק קודם
   const checkPreviousGame = useCallback((skipDebouncing = false) => {
@@ -460,13 +469,15 @@ const JoinGamePage = () => {
         });
 
         // בדיקה אם השחקן כבר במשחק
-        if (joined) {
+        // Use joinedRef.current — `joined` state is stale inside this
+        // useEffect([]) closure.
+        if (joinedRef.current) {
           console.log("⚠️ Player already joined game, ignoring notification");
           return;
         }
 
         // בדיקה אם ה-modal כבר פתוח
-        if (showRejoinModal) {
+        if (showRejoinModalRef.current) {
           console.log("⚠️ Modal already open, ignoring notification");
           return;
         }
