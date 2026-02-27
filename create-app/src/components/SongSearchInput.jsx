@@ -123,7 +123,7 @@ const SortableSongItem = React.memo(
           alt={song.title}
           className="w-10 h-10 rounded-md mr-3"
         />
-        <div className="flex-1">
+        <div className="flex-1 min-w-0">
           {isEditingTitle ? (
             <div className="space-y-2">
               <input
@@ -160,8 +160,8 @@ const SortableSongItem = React.memo(
             </div>
           ) : (
             <>
-              <p className="font-medium text-gray-900">{song.title}</p>
-              <p className="text-sm text-gray-600">{song.artist}</p>
+              <p className="font-medium text-gray-900 truncate">{song.title}</p>
+              <p className="text-sm text-gray-600 truncate">{song.artist}</p>
             </>
           )}
         </div>
@@ -177,7 +177,7 @@ const SortableSongItem = React.memo(
                   e.stopPropagation();
                   handleSaveTitleEdit();
                 }}
-                className="text-green-600 hover:text-green-800 p-2"
+                className="text-green-600 hover:text-green-800 p-1.5 sm:p-2"
                 title="Save title changes"
               >
                 <FaCheck size={14} />
@@ -189,7 +189,7 @@ const SortableSongItem = React.memo(
                   e.stopPropagation();
                   handleCancelTitleEdit();
                 }}
-                className="text-gray-500 hover:text-gray-700 p-2"
+                className="text-gray-500 hover:text-gray-700 p-1.5 sm:p-2"
                 title="Cancel"
               >
                 <FaTimes size={14} />
@@ -204,7 +204,7 @@ const SortableSongItem = React.memo(
                   e.stopPropagation();
                   handleSaveArtistEdit();
                 }}
-                className="text-green-600 hover:text-green-800 p-2"
+                className="text-green-600 hover:text-green-800 p-1.5 sm:p-2"
                 title="Save artist changes"
               >
                 <FaCheck size={14} />
@@ -216,7 +216,7 @@ const SortableSongItem = React.memo(
                   e.stopPropagation();
                   handleCancelArtistEdit();
                 }}
-                className="text-gray-500 hover:text-gray-700 p-2"
+                className="text-gray-500 hover:text-gray-700 p-1.5 sm:p-2"
                 title="Cancel"
               >
                 <FaTimes size={14} />
@@ -231,7 +231,7 @@ const SortableSongItem = React.memo(
                   e.stopPropagation();
                   setIsEditingTitle(true);
                 }}
-                className="text-blue-600 hover:text-blue-800 p-2"
+                className="text-blue-600 hover:text-blue-800 p-1.5 sm:p-2"
                 title="Edit song title"
               >
                 <FaEdit size={14} />
@@ -243,7 +243,7 @@ const SortableSongItem = React.memo(
                   e.stopPropagation();
                   setIsEditingArtist(true);
                 }}
-                className="text-purple-600 hover:text-purple-800 p-2"
+                className="text-purple-600 hover:text-purple-800 p-1.5 sm:p-2"
                 title="Edit artist name"
               >
                 <FaUser size={14} />
@@ -255,7 +255,7 @@ const SortableSongItem = React.memo(
                   e.stopPropagation();
                   onEditLyrics(index);
                 }}
-                className="text-green-600 hover:text-green-800 p-2"
+                className="text-green-600 hover:text-green-800 p-1.5 sm:p-2"
                 title="Edit lyrics manually"
               >
                 <FaFileAlt size={14} />
@@ -268,7 +268,7 @@ const SortableSongItem = React.memo(
                   e.stopPropagation();
                   onRemove(index);
                 }}
-                className="text-red-500 hover:text-red-700 p-2"
+                className="text-red-500 hover:text-red-700 p-1.5 sm:p-2"
                 title="Remove song"
               >
                 <FaTimes size={14} />
@@ -953,11 +953,11 @@ const SongSearchInput = ({ onSongSelect, selectedSongs = [] }) => {
       {/* רשימת שירים שנבחרו עם drag and drop */}
       {selectedSongs.length > 0 && (
         <div className="mt-6">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-gray-700">
+          <div className="flex items-start justify-between mb-4 gap-2">
+            <h3 className="text-lg font-semibold text-gray-700 shrink-0">
               Selected Songs ({selectedSongs.length})
             </h3>
-            <p className="text-sm text-gray-500">
+            <p className="hidden sm:block text-sm text-gray-500 text-right">
               💡 Drag <FaGripVertical className="inline mx-1" /> to reorder •
               Click <FaEdit className="inline mx-1 text-blue-600" /> to edit
               title • Click <FaUser className="inline mx-1 text-purple-600" />{" "}
@@ -998,8 +998,8 @@ const SongSearchInput = ({ onSongSelect, selectedSongs = [] }) => {
 
       {/* Modal לעריכת מילות השיר */}
       {showLyricsModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[80vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-end sm:items-center justify-center z-50 p-0 sm:p-4">
+          <div className="bg-white rounded-t-2xl sm:rounded-lg p-4 sm:p-6 w-full sm:max-w-2xl max-h-[90vh] sm:max-h-[80vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-xl font-bold text-gray-800">
                 Edit Song Lyrics

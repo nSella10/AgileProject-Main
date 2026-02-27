@@ -176,24 +176,24 @@ const EditGamePage = () => {
     <PageLayout>
       <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50">
         {/* Header */}
-        <div className="bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 py-12 text-white relative overflow-hidden">
+        <div className="bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 py-8 sm:py-12 text-white relative overflow-hidden">
           <div className="absolute inset-0 bg-black opacity-10"></div>
           <div className="relative max-w-7xl mx-auto px-4">
             <button
               onClick={() => navigate("/mygames")}
-              className="flex items-center gap-2 text-purple-100 hover:text-white mb-6 transition-colors"
+              className="flex items-center gap-2 text-purple-100 hover:text-white mb-4 sm:mb-6 transition-colors"
             >
               <FaArrowLeft />
               <span>Back to My Games</span>
             </button>
             <div className="text-center">
-              <div className="mb-4">
-                <span className="text-5xl">✏️</span>
+              <div className="mb-3 sm:mb-4">
+                <span className="text-4xl sm:text-5xl">✏️</span>
               </div>
-              <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-white to-purple-100 bg-clip-text text-transparent">
+              <h1 className="text-2xl sm:text-4xl md:text-5xl font-bold mb-3 sm:mb-4 bg-gradient-to-r from-white to-purple-100 bg-clip-text text-transparent">
                 Edit Your Music Game
               </h1>
-              <p className="text-xl text-purple-100 max-w-2xl mx-auto">
+              <p className="text-sm sm:text-xl text-purple-100 max-w-2xl mx-auto">
                 Update your game details, modify songs, and perfect your music
                 quiz experience
               </p>
@@ -202,33 +202,33 @@ const EditGamePage = () => {
         </div>
 
         {/* Main Content */}
-        <div className="max-w-5xl mx-auto px-4 py-12">
+        <div className="max-w-5xl mx-auto px-4 py-6 sm:py-12">
           {/* Progress Steps */}
           <div className="mb-12">
-            <div className="flex items-center justify-center space-x-8">
+            <div className="flex items-center justify-center">
               <div className="flex items-center">
-                <div className="bg-purple-600 text-white rounded-full w-10 h-10 flex items-center justify-center font-bold">
+                <div className="bg-purple-600 text-white rounded-full w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center font-bold text-sm sm:text-base shrink-0">
                   1
                 </div>
-                <span className="ml-3 text-purple-600 font-semibold">
+                <span className="hidden sm:inline ml-3 text-purple-600 font-semibold">
                   Game Details
                 </span>
               </div>
-              <div className="w-16 h-1 bg-purple-200 rounded"></div>
+              <div className="w-8 sm:w-16 h-1 bg-purple-200 rounded mx-2 sm:mx-3"></div>
               <div className="flex items-center">
-                <div className="bg-purple-600 text-white rounded-full w-10 h-10 flex items-center justify-center font-bold">
+                <div className="bg-purple-600 text-white rounded-full w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center font-bold text-sm sm:text-base shrink-0">
                   2
                 </div>
-                <span className="ml-3 text-purple-600 font-semibold">
+                <span className="hidden sm:inline ml-3 text-purple-600 font-semibold">
                   Update Songs
                 </span>
               </div>
-              <div className="w-16 h-1 bg-purple-200 rounded"></div>
+              <div className="w-8 sm:w-16 h-1 bg-purple-200 rounded mx-2 sm:mx-3"></div>
               <div className="flex items-center">
-                <div className="bg-purple-600 text-white rounded-full w-10 h-10 flex items-center justify-center font-bold">
+                <div className="bg-purple-600 text-white rounded-full w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center font-bold text-sm sm:text-base shrink-0">
                   3
                 </div>
-                <span className="ml-3 text-purple-600 font-semibold">
+                <span className="hidden sm:inline ml-3 text-purple-600 font-semibold">
                   Save Changes
                 </span>
               </div>
@@ -243,7 +243,7 @@ const EditGamePage = () => {
 
           <form onSubmit={submitHandler} className="space-y-8">
             {/* Game Details Card */}
-            <div className="bg-white rounded-3xl p-8 shadow-xl border border-gray-100">
+            <div className="bg-white rounded-3xl p-4 sm:p-8 shadow-xl border border-gray-100">
               <div className="flex items-center gap-3 mb-6">
                 <div className="bg-purple-100 p-3 rounded-2xl">
                   <FaMusic className="text-purple-600 text-xl" />
@@ -291,12 +291,12 @@ const EditGamePage = () => {
               {/* Game Settings */}
               <div className="mt-8 space-y-6">
                 {/* Visibility Settings */}
-                <div className="p-6 bg-gray-50 rounded-2xl">
+                <div className="p-4 sm:p-6 bg-gray-50 rounded-2xl">
                   <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
                     <FaUsers className="text-purple-600" />
                     Game Visibility
                   </h3>
-                  <div className="flex items-center gap-6">
+                  <div className="flex flex-col sm:flex-row gap-3 sm:gap-6">
                     <label className="flex items-center gap-3 cursor-pointer">
                       <input
                         type="radio"
@@ -335,7 +335,7 @@ const EditGamePage = () => {
                 </div>
 
                 {/* Guess Time Limit */}
-                <div className="p-6 bg-blue-50 rounded-2xl">
+                <div className="p-4 sm:p-6 bg-blue-50 rounded-2xl">
                   <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
                     ⏱️ Guess Time Limit
                   </h3>
@@ -401,7 +401,7 @@ const EditGamePage = () => {
                 </div>
 
                 {/* Guess Input Method */}
-                <div className="p-6 bg-green-50 rounded-2xl">
+                <div className="p-4 sm:p-6 bg-green-50 rounded-2xl">
                   <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
                     ✏️ Guess Input Method
                   </h3>
@@ -450,7 +450,7 @@ const EditGamePage = () => {
             </div>
 
             {/* Songs Card */}
-            <div className="bg-white rounded-3xl p-8 shadow-xl border border-gray-100">
+            <div className="bg-white rounded-3xl p-4 sm:p-8 shadow-xl border border-gray-100">
               <div className="flex items-center gap-3 mb-6">
                 <div className="bg-blue-100 p-3 rounded-2xl">
                   <FaHeadphones className="text-blue-600 text-xl" />
@@ -509,7 +509,7 @@ const EditGamePage = () => {
             </div>
 
             {/* Tips */}
-            <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl p-6 border border-purple-200">
+            <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl p-4 sm:p-6 border border-purple-200">
               <div className="flex items-start gap-3">
                 <FaStar className="text-purple-600 text-xl mt-1" />
                 <div>
