@@ -29,20 +29,20 @@ const HomePage = () => {
         <div className="space-y-4">
           <button
             onClick={() => navigate("/join")}
-            className="w-full bg-gradient-to-r from-purple-600 to-pink-600 bg-opacity-80 backdrop-blur-lg rounded-2xl p-6 border border-purple-400 border-opacity-30 shadow-xl hover:from-purple-500 hover:to-pink-500 transition-all duration-300 transform hover:scale-105 text-left group"
+            className="w-full bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20 shadow-xl hover:bg-white/15 transition-all duration-300 transform hover:scale-105 text-left group"
           >
             <div className="flex items-center gap-4">
               <div className="text-4xl group-hover:scale-110 transition-transform">
-                🏠
+                🎮
               </div>
               <div>
                 <h2 className="text-xl font-bold text-white">
                   Join a Game
                 </h2>
-                <p className="text-purple-100 text-sm mt-1">
-                  Enter a room code from your host to join a local game
+                <p className="text-purple-200 text-sm mt-1">
+                  Enter a room code from your host to join
                 </p>
-                <p className="text-purple-200 text-xs mt-1">
+                <p className="text-purple-300 text-xs mt-1">
                   No account needed
                 </p>
               </div>
@@ -51,6 +51,23 @@ const HomePage = () => {
               </div>
             </div>
           </button>
+        </div>
+
+        {/* Already have an account? */}
+        <div className="mt-8">
+          <p className="text-purple-300 text-sm">
+            Want to create games or play online?{" "}
+            <a
+              href={
+                process.env.NODE_ENV === "development"
+                  ? "http://localhost:3001"
+                  : "https://create.guessifyapp.com"
+              }
+              className="text-pink-300 hover:text-pink-200 font-medium underline underline-offset-2 transition-colors"
+            >
+              Sign in to Guessify
+            </a>
+          </p>
         </div>
       </div>
     </div>

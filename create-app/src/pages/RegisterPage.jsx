@@ -46,12 +46,12 @@ const RegisterPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-600 via-blue-600 to-indigo-800 flex items-center justify-center px-4 py-8">
+    <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 flex items-center justify-center px-4 py-8">
       {/* Background decorations */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-white opacity-10 rounded-full"></div>
-        <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-white opacity-5 rounded-full"></div>
-        <div className="absolute top-1/2 left-1/4 w-32 h-32 bg-yellow-300 opacity-20 rounded-full"></div>
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-400 opacity-10 rounded-full blur-3xl"></div>
+        <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-pink-400 opacity-10 rounded-full blur-3xl"></div>
+        <div className="absolute top-1/2 left-1/4 w-32 h-32 bg-purple-300 opacity-10 rounded-full blur-3xl"></div>
       </div>
 
       <div className="relative w-full max-w-6xl grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
@@ -69,22 +69,22 @@ const RegisterPage = () => {
 
           <div className="space-y-4">
             <div className="flex items-center space-x-3 justify-center lg:justify-start">
-              <div className="w-8 h-8 bg-green-400 rounded-full flex items-center justify-center">
+              <div className="w-8 h-8 bg-purple-400/30 backdrop-blur rounded-full flex items-center justify-center border border-purple-300/30">
                 <span className="text-white font-bold">✓</span>
               </div>
-              <span className="text-lg">Create unlimited music games</span>
+              <span className="text-lg text-purple-100">Create unlimited music games</span>
             </div>
             <div className="flex items-center space-x-3 justify-center lg:justify-start">
-              <div className="w-8 h-8 bg-green-400 rounded-full flex items-center justify-center">
+              <div className="w-8 h-8 bg-purple-400/30 backdrop-blur rounded-full flex items-center justify-center border border-purple-300/30">
                 <span className="text-white font-bold">✓</span>
               </div>
-              <span className="text-lg">Access to thousands of songs</span>
+              <span className="text-lg text-purple-100">Access to thousands of songs</span>
             </div>
             <div className="flex items-center space-x-3 justify-center lg:justify-start">
-              <div className="w-8 h-8 bg-green-400 rounded-full flex items-center justify-center">
+              <div className="w-8 h-8 bg-purple-400/30 backdrop-blur rounded-full flex items-center justify-center border border-purple-300/30">
                 <span className="text-white font-bold">✓</span>
               </div>
-              <span className="text-lg">
+              <span className="text-lg text-purple-100">
                 Perfect for education & entertainment
               </span>
             </div>
@@ -101,19 +101,19 @@ const RegisterPage = () => {
         </div>
 
         {/* Right side - Registration form */}
-        <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md mx-auto">
+        <div className="bg-white/10 backdrop-blur-lg rounded-2xl shadow-2xl p-8 w-full max-w-md mx-auto border border-white/20">
           {successMessage ? (
             <div className="text-center space-y-6">
-              <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto">
+              <div className="w-20 h-20 bg-white/10 backdrop-blur rounded-full flex items-center justify-center mx-auto border border-white/20">
                 <span className="text-4xl">🎉</span>
               </div>
-              <h2 className="text-2xl font-bold text-green-600">
+              <h2 className="text-2xl font-bold text-white">
                 Welcome to Guessify!
               </h2>
-              <p className="text-gray-600">{successMessage}</p>
+              <p className="text-purple-200">{successMessage}</p>
               <a
                 href="/login"
-                className="inline-block bg-green-600 text-white px-8 py-3 rounded-lg hover:bg-green-700 transition-colors font-medium"
+                className="inline-block bg-gradient-to-r from-purple-600 to-pink-600 text-white px-8 py-3 rounded-xl hover:from-purple-500 hover:to-pink-500 transition-all duration-300 font-medium shadow-lg"
               >
                 Continue to Login →
               </a>
@@ -121,19 +121,19 @@ const RegisterPage = () => {
           ) : (
             <>
               <div className="text-center mb-8">
-                <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <div className="w-16 h-16 bg-white/10 backdrop-blur rounded-full flex items-center justify-center mx-auto mb-4 border border-white/20">
                   <span className="text-3xl">🎵</span>
                 </div>
-                <h2 className="text-3xl font-bold text-gray-800 mb-2">
+                <h2 className="text-3xl font-bold text-white mb-2">
                   Create Your Account
                 </h2>
-                <p className="text-gray-600">
+                <p className="text-purple-200">
                   Start your musical journey today!
                 </p>
               </div>
 
               {errorMessage && (
-                <div className="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+                <div className="mb-6 bg-red-500/20 border border-red-400/30 text-red-200 px-4 py-3 rounded-xl text-sm">
                   <div className="flex items-center">
                     <span className="mr-2">⚠️</span>
                     {errorMessage}
@@ -146,7 +146,7 @@ const RegisterPage = () => {
                   <div>
                     <label
                       htmlFor="firstName"
-                      className="block text-gray-700 font-medium mb-2"
+                      className="block text-purple-200 font-medium mb-2 text-sm"
                     >
                       First Name
                     </label>
@@ -157,13 +157,13 @@ const RegisterPage = () => {
                       onChange={(e) => setFirstName(e.target.value)}
                       required
                       placeholder="Enter your first name"
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                      className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-purple-300/50 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent transition-all"
                     />
                   </div>
                   <div>
                     <label
                       htmlFor="lastName"
-                      className="block text-gray-700 font-medium mb-2"
+                      className="block text-purple-200 font-medium mb-2 text-sm"
                     >
                       Last Name
                     </label>
@@ -174,7 +174,7 @@ const RegisterPage = () => {
                       onChange={(e) => setLastName(e.target.value)}
                       required
                       placeholder="Enter your last name"
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                      className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-purple-300/50 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent transition-all"
                     />
                   </div>
                 </div>
@@ -182,7 +182,7 @@ const RegisterPage = () => {
                 <div>
                   <label
                     htmlFor="email"
-                    className="block text-gray-700 font-medium mb-2"
+                    className="block text-purple-200 font-medium mb-2 text-sm"
                   >
                     Email Address
                   </label>
@@ -193,14 +193,14 @@ const RegisterPage = () => {
                     onChange={(e) => setEmail(e.target.value)}
                     required
                     placeholder="your.email@example.com"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-purple-300/50 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent transition-all"
                   />
                 </div>
 
                 <div>
                   <label
                     htmlFor="confirmEmail"
-                    className="block text-gray-700 font-medium mb-2"
+                    className="block text-purple-200 font-medium mb-2 text-sm"
                   >
                     Confirm Email Address
                   </label>
@@ -211,7 +211,7 @@ const RegisterPage = () => {
                     onChange={(e) => setConfirmEmail(e.target.value)}
                     required
                     placeholder="Confirm your email address"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-purple-300/50 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent transition-all"
                   />
                 </div>
 
@@ -219,7 +219,7 @@ const RegisterPage = () => {
                   <div>
                     <label
                       htmlFor="password"
-                      className="block text-gray-700 font-medium mb-2"
+                      className="block text-purple-200 font-medium mb-2 text-sm"
                     >
                       Password
                     </label>
@@ -230,14 +230,14 @@ const RegisterPage = () => {
                       onChange={(e) => setPassword(e.target.value)}
                       required
                       placeholder="Create a strong password"
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                      className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-purple-300/50 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent transition-all"
                     />
                   </div>
 
                   <div>
                     <label
                       htmlFor="confirmPassword"
-                      className="block text-gray-700 font-medium mb-2"
+                      className="block text-purple-200 font-medium mb-2 text-sm"
                     >
                       Confirm Password
                     </label>
@@ -248,14 +248,14 @@ const RegisterPage = () => {
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       required
                       placeholder="Confirm your password"
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                      className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-purple-300/50 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent transition-all"
                     />
                   </div>
                 </div>
 
                 <button
                   type="submit"
-                  className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-4 rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 font-medium text-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                  className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-4 rounded-xl hover:from-purple-500 hover:to-pink-500 transition-all duration-300 font-semibold text-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
                   disabled={isLoading}
                 >
                   {isLoading ? (
@@ -272,12 +272,12 @@ const RegisterPage = () => {
                 </button>
               </form>
 
-              <div className="text-center mt-6 pt-6 border-t border-gray-200">
-                <p className="text-gray-600">
+              <div className="text-center mt-6 pt-6 border-t border-white/10">
+                <p className="text-purple-300">
                   Already have an account?{" "}
                   <a
                     href="/login"
-                    className="text-blue-600 hover:text-blue-700 font-medium transition-colors"
+                    className="text-pink-300 hover:text-pink-200 font-medium transition-colors"
                   >
                     Sign in here →
                   </a>

@@ -30,12 +30,12 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 flex items-center justify-center px-4 py-8">
+    <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 flex items-center justify-center px-4 py-8">
       {/* Background decorations */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -left-40 w-80 h-80 bg-white opacity-10 rounded-full"></div>
-        <div className="absolute -bottom-40 -right-40 w-96 h-96 bg-white opacity-5 rounded-full"></div>
-        <div className="absolute top-1/3 right-1/4 w-32 h-32 bg-yellow-300 opacity-20 rounded-full"></div>
+        <div className="absolute -top-40 -left-40 w-80 h-80 bg-purple-400 opacity-10 rounded-full blur-3xl"></div>
+        <div className="absolute -bottom-40 -right-40 w-96 h-96 bg-pink-400 opacity-10 rounded-full blur-3xl"></div>
+        <div className="absolute top-1/3 right-1/4 w-32 h-32 bg-purple-300 opacity-10 rounded-full blur-3xl"></div>
       </div>
 
       <div className="relative w-full max-w-6xl grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
@@ -53,22 +53,22 @@ const LoginPage = () => {
 
           <div className="space-y-4">
             <div className="flex items-center space-x-3 justify-center lg:justify-start">
-              <div className="w-8 h-8 bg-green-400 rounded-full flex items-center justify-center">
-                <span className="text-white font-bold">🎮</span>
+              <div className="w-8 h-8 bg-purple-400/30 backdrop-blur rounded-full flex items-center justify-center border border-purple-300/30">
+                <span className="text-white font-bold text-sm">🎮</span>
               </div>
-              <span className="text-lg">Access your saved games</span>
+              <span className="text-lg text-purple-100">Access your saved games</span>
             </div>
             <div className="flex items-center space-x-3 justify-center lg:justify-start">
-              <div className="w-8 h-8 bg-green-400 rounded-full flex items-center justify-center">
-                <span className="text-white font-bold">📊</span>
+              <div className="w-8 h-8 bg-purple-400/30 backdrop-blur rounded-full flex items-center justify-center border border-purple-300/30">
+                <span className="text-white font-bold text-sm">📊</span>
               </div>
-              <span className="text-lg">View your game analytics</span>
+              <span className="text-lg text-purple-100">View your game analytics</span>
             </div>
             <div className="flex items-center space-x-3 justify-center lg:justify-start">
-              <div className="w-8 h-8 bg-green-400 rounded-full flex items-center justify-center">
-                <span className="text-white font-bold">🚀</span>
+              <div className="w-8 h-8 bg-purple-400/30 backdrop-blur rounded-full flex items-center justify-center border border-purple-300/30">
+                <span className="text-white font-bold text-sm">🚀</span>
               </div>
-              <span className="text-lg">Create new games instantly</span>
+              <span className="text-lg text-purple-100">Create new games instantly</span>
             </div>
           </div>
 
@@ -83,19 +83,19 @@ const LoginPage = () => {
         </div>
 
         {/* Right side - Login form */}
-        <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md mx-auto">
+        <div className="bg-white/10 backdrop-blur-lg rounded-2xl shadow-2xl p-8 w-full max-w-md mx-auto border border-white/20">
           <div className="text-center mb-8">
-            <div className="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <div className="w-16 h-16 bg-white/10 backdrop-blur rounded-full flex items-center justify-center mx-auto mb-4 border border-white/20">
               <span className="text-3xl">🎵</span>
             </div>
-            <h2 className="text-3xl font-bold text-gray-800 mb-2">
+            <h2 className="text-3xl font-bold text-white mb-2">
               Welcome Back
             </h2>
-            <p className="text-gray-600">Sign in to your account</p>
+            <p className="text-purple-200">Sign in to your account</p>
           </div>
 
           {fromCreate && (
-            <div className="mb-6 bg-blue-50 border border-blue-200 text-blue-700 px-4 py-3 rounded-lg text-sm">
+            <div className="mb-6 bg-purple-500/20 border border-purple-400/30 text-purple-200 px-4 py-3 rounded-xl text-sm">
               <div className="flex items-center">
                 <span className="mr-2">ℹ️</span>
                 You must be logged in to create a game.
@@ -104,7 +104,7 @@ const LoginPage = () => {
           )}
 
           {errorMessage && (
-            <div className="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+            <div className="mb-6 bg-red-500/20 border border-red-400/30 text-red-200 px-4 py-3 rounded-xl text-sm">
               <div className="flex items-center">
                 <span className="mr-2">⚠️</span>
                 {errorMessage}
@@ -116,7 +116,7 @@ const LoginPage = () => {
             <div>
               <label
                 htmlFor="email"
-                className="block text-gray-700 font-medium mb-2"
+                className="block text-purple-200 font-medium mb-2 text-sm"
               >
                 Email Address
               </label>
@@ -126,7 +126,7 @@ const LoginPage = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-purple-300/50 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent transition-all"
                 placeholder="your.email@example.com"
               />
             </div>
@@ -134,7 +134,7 @@ const LoginPage = () => {
             <div>
               <label
                 htmlFor="password"
-                className="block text-gray-700 font-medium mb-2"
+                className="block text-purple-200 font-medium mb-2 text-sm"
               >
                 Password
               </label>
@@ -144,14 +144,14 @@ const LoginPage = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-purple-300/50 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent transition-all"
                 placeholder="Enter your password"
               />
             </div>
 
             <button
               type="submit"
-              className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-4 rounded-lg hover:from-indigo-700 hover:to-purple-700 transition-all duration-200 font-medium text-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+              className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-4 rounded-xl hover:from-purple-500 hover:to-pink-500 transition-all duration-300 font-semibold text-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
               disabled={isLoading}
             >
               {isLoading ? (
@@ -168,12 +168,12 @@ const LoginPage = () => {
             </button>
           </form>
 
-          <div className="text-center mt-6 pt-6 border-t border-gray-200">
-            <p className="text-gray-600">
+          <div className="text-center mt-6 pt-6 border-t border-white/10">
+            <p className="text-purple-300">
               Don't have an account?{" "}
               <a
                 href="/register"
-                className="text-indigo-600 hover:text-indigo-700 font-medium transition-colors"
+                className="text-pink-300 hover:text-pink-200 font-medium transition-colors"
               >
                 Create one here →
               </a>

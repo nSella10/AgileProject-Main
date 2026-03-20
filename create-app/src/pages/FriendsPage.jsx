@@ -5,11 +5,17 @@ import { toast } from "react-toastify";
 import { getSocket } from "../socket";
 import { BASE_URL, PLAY_APP_URL } from "../constants";
 import PageLayout from "../components/PageLayout";
+import {
+  FaArrowLeft,
+  FaUserFriends,
+  FaSearch,
+  FaEnvelope,
+} from "react-icons/fa";
 
 const PRESENCE_LABELS = {
   online: { text: "Online", color: "bg-green-400" },
   in_lobby: { text: "In Lobby", color: "bg-yellow-400" },
-  in_game: { text: "In Game", color: "bg-blue-400" },
+  in_game: { text: "In Game", color: "bg-indigo-400" },
   offline: { text: "Offline", color: "bg-gray-400" },
 };
 
@@ -32,7 +38,7 @@ const FriendsPage = () => {
         credentials: "include",
       });
       const data = await res.json();
-      setFriends(data);
+      setFriends(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error("Failed to fetch friends:", err);
     }
@@ -44,7 +50,7 @@ const FriendsPage = () => {
         credentials: "include",
       });
       const data = await res.json();
-      setRequests(data);
+      setRequests(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error("Failed to fetch requests:", err);
     }
@@ -170,35 +176,45 @@ const FriendsPage = () => {
 
   return (
     <PageLayout>
-      <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 px-4 py-6 relative overflow-hidden">
-        <div className="absolute inset-0">
-          <div className="absolute top-20 left-10 w-48 h-48 bg-purple-400 opacity-20 rounded-full blur-3xl animate-pulse"></div>
-          <div className="absolute bottom-20 right-10 w-64 h-64 bg-pink-400 opacity-10 rounded-full blur-3xl animate-pulse"></div>
-        </div>
-
-        <div className="relative z-10 max-w-2xl mx-auto">
-          {/* Header */}
-          <div className="flex items-center justify-between mb-6">
+      <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50">
+        {/* Header */}
+        <div className="bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 py-8 sm:py-12 text-white relative overflow-hidden">
+          <div className="absolute inset-0 bg-black opacity-10"></div>
+          <div className="relative max-w-3xl mx-auto px-4">
             <button
               onClick={() => navigate("/play-online")}
-              className="text-purple-200 hover:text-white transition-colors text-lg"
+              className="flex items-center gap-2 text-purple-100 hover:text-white mb-4 sm:mb-6 transition-colors"
             >
-              ← Back to Lobby
+              <FaArrowLeft />
+              <span>Back to Lobby</span>
             </button>
-            <h1 className="text-2xl font-bold text-white">👥 Friends</h1>
-            <div className="w-16"></div>
+            <div className="text-center">
+              <div className="mb-3">
+                <span className="text-4xl sm:text-5xl">👥</span>
+              </div>
+              <h1 className="text-2xl sm:text-4xl font-bold mb-2 bg-gradient-to-r from-white to-purple-100 bg-clip-text text-transparent">
+                Friends
+              </h1>
+              <p className="text-sm sm:text-lg text-purple-100 max-w-xl mx-auto">
+                Connect with players, see who's online, and join their games
+              </p>
+            </div>
           </div>
+        </div>
 
+        {/* Main Content */}
+        <div className="max-w-3xl mx-auto px-4 py-8">
           {/* Tabs */}
           <div className="flex gap-2 mb-6">
             <button
               onClick={() => setTab("friends")}
-              className={`flex-1 py-2 rounded-xl font-semibold transition-all text-sm ${
+              className={`flex-1 py-2.5 rounded-xl font-semibold transition-all text-sm flex items-center justify-center gap-2 ${
                 tab === "friends"
-                  ? "bg-purple-600 text-white"
-                  : "bg-white bg-opacity-10 text-purple-200 hover:bg-opacity-20"
+                  ? "bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg"
+                  : "bg-white text-gray-600 border border-gray-200 hover:border-purple-300 hover:text-purple-600"
               }`}
             >
+              <FaUserFriends className="text-xs" />
               Friends ({friends.length})
             </button>
             <button
@@ -206,12 +222,13 @@ const FriendsPage = () => {
                 setTab("requests");
                 fetchRequests();
               }}
-              className={`flex-1 py-2 rounded-xl font-semibold transition-all text-sm relative ${
+              className={`flex-1 py-2.5 rounded-xl font-semibold transition-all text-sm relative flex items-center justify-center gap-2 ${
                 tab === "requests"
-                  ? "bg-purple-600 text-white"
-                  : "bg-white bg-opacity-10 text-purple-200 hover:bg-opacity-20"
+                  ? "bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg"
+                  : "bg-white text-gray-600 border border-gray-200 hover:border-purple-300 hover:text-purple-600"
               }`}
             >
+              <FaEnvelope className="text-xs" />
               Requests
               {requests.length > 0 && (
                 <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">
@@ -221,12 +238,13 @@ const FriendsPage = () => {
             </button>
             <button
               onClick={() => setTab("search")}
-              className={`flex-1 py-2 rounded-xl font-semibold transition-all text-sm ${
+              className={`flex-1 py-2.5 rounded-xl font-semibold transition-all text-sm flex items-center justify-center gap-2 ${
                 tab === "search"
-                  ? "bg-purple-600 text-white"
-                  : "bg-white bg-opacity-10 text-purple-200 hover:bg-opacity-20"
+                  ? "bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg"
+                  : "bg-white text-gray-600 border border-gray-200 hover:border-purple-300 hover:text-purple-600"
               }`}
             >
+              <FaSearch className="text-xs" />
               Search
             </button>
           </div>
@@ -236,20 +254,21 @@ const FriendsPage = () => {
             <div className="space-y-3">
               {loading ? (
                 <div className="text-center py-12">
-                  <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-white mx-auto mb-4"></div>
+                  <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-purple-600 mx-auto mb-4"></div>
+                  <p className="text-gray-500">Loading friends...</p>
                 </div>
               ) : friends.length === 0 ? (
-                <div className="bg-white bg-opacity-10 backdrop-blur-lg rounded-2xl p-8 border border-white border-opacity-20 text-center">
+                <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100 text-center">
                   <div className="text-4xl mb-4">👋</div>
-                  <p className="text-white text-lg font-semibold mb-2">
+                  <p className="text-gray-800 text-lg font-semibold mb-2">
                     No friends yet
                   </p>
-                  <p className="text-purple-200 text-sm mb-4">
+                  <p className="text-gray-500 text-sm mb-4">
                     Search for players to add them as friends!
                   </p>
                   <button
                     onClick={() => setTab("search")}
-                    className="bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold px-6 py-2 rounded-xl hover:from-purple-500 hover:to-pink-500 transition-all"
+                    className="bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold px-6 py-2.5 rounded-xl hover:from-purple-500 hover:to-pink-500 transition-all shadow-lg"
                   >
                     Find Friends
                   </button>
@@ -269,7 +288,7 @@ const FriendsPage = () => {
                   return (
                     <div
                       key={friend.friendshipId}
-                      className="bg-white bg-opacity-10 backdrop-blur-lg rounded-2xl p-4 border border-white border-opacity-20"
+                      className="bg-white rounded-2xl p-4 shadow-lg border border-gray-100 hover:shadow-xl transition-all"
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
@@ -278,20 +297,20 @@ const FriendsPage = () => {
                               {friend.firstName[0]}
                             </div>
                             <div
-                              className={`absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 ${presenceInfo.color} rounded-full border-2 border-purple-900`}
+                              className={`absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 ${presenceInfo.color} rounded-full border-2 border-white`}
                             ></div>
                           </div>
                           <div>
-                            <p className="text-white font-semibold">
+                            <p className="text-gray-800 font-semibold">
                               {friend.firstName} {friend.lastName}
                             </p>
-                            <p className="text-purple-300 text-xs">
+                            <p className="text-gray-500 text-xs">
                               {presenceInfo.text}
                               {p.status === "in_lobby" && p.roomVisibility === "private" && (
-                                <span className="ml-1 text-red-300">🔒</span>
+                                <span className="ml-1 text-red-400">🔒</span>
                               )}
                               {p.status === "in_lobby" && p.roomVisibility === "friends" && (
-                                <span className="ml-1 text-yellow-300">👥</span>
+                                <span className="ml-1 text-yellow-500">👥</span>
                               )}
                             </p>
                           </div>
@@ -300,13 +319,13 @@ const FriendsPage = () => {
                           {canShowJoin && (
                             <button
                               onClick={() => handleJoinFriendGame(p.roomCode)}
-                              className="bg-green-500 text-white text-xs font-bold px-3 py-1.5 rounded-lg hover:bg-green-400 transition-all"
+                              className="bg-gradient-to-r from-purple-600 to-pink-600 text-white text-xs font-bold px-3 py-1.5 rounded-lg hover:from-purple-500 hover:to-pink-500 transition-all shadow-md"
                             >
                               Join Game
                             </button>
                           )}
                           {p.status === "in_lobby" && p.roomVisibility === "private" && (
-                            <span className="text-purple-400 text-xs">Invite only</span>
+                            <span className="text-gray-400 text-xs">Invite only</span>
                           )}
                           <button
                             onClick={() =>
@@ -315,7 +334,7 @@ const FriendsPage = () => {
                                 friend.firstName
                               )
                             }
-                            className="text-red-300 hover:text-red-400 text-xs transition-colors"
+                            className="text-red-400 hover:text-red-500 text-xs transition-colors"
                           >
                             Remove
                           </button>
@@ -332,9 +351,9 @@ const FriendsPage = () => {
           {tab === "requests" && (
             <div className="space-y-3">
               {requests.length === 0 ? (
-                <div className="bg-white bg-opacity-10 backdrop-blur-lg rounded-2xl p-8 border border-white border-opacity-20 text-center">
+                <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100 text-center">
                   <div className="text-4xl mb-4">📭</div>
-                  <p className="text-white text-lg font-semibold">
+                  <p className="text-gray-800 text-lg font-semibold">
                     No pending requests
                   </p>
                 </div>
@@ -342,7 +361,7 @@ const FriendsPage = () => {
                 requests.map((req) => (
                   <div
                     key={req._id}
-                    className="bg-white bg-opacity-10 backdrop-blur-lg rounded-2xl p-4 border border-white border-opacity-20"
+                    className="bg-white rounded-2xl p-4 shadow-lg border border-gray-100 hover:shadow-xl transition-all"
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
@@ -350,10 +369,10 @@ const FriendsPage = () => {
                           {req.requester.firstName[0]}
                         </div>
                         <div>
-                          <p className="text-white font-semibold">
+                          <p className="text-gray-800 font-semibold">
                             {req.requester.firstName} {req.requester.lastName}
                           </p>
-                          <p className="text-purple-300 text-xs">
+                          <p className="text-gray-400 text-xs">
                             {req.requester.email}
                           </p>
                         </div>
@@ -361,13 +380,13 @@ const FriendsPage = () => {
                       <div className="flex gap-2">
                         <button
                           onClick={() => handleAccept(req._id)}
-                          className="bg-green-500 text-white text-sm font-bold px-4 py-1.5 rounded-lg hover:bg-green-400 transition-all"
+                          className="bg-gradient-to-r from-purple-600 to-pink-600 text-white text-sm font-bold px-4 py-1.5 rounded-lg hover:from-purple-500 hover:to-pink-500 transition-all shadow-md"
                         >
                           Accept
                         </button>
                         <button
                           onClick={() => handleReject(req._id)}
-                          className="bg-red-500 bg-opacity-50 text-white text-sm font-bold px-4 py-1.5 rounded-lg hover:bg-opacity-70 transition-all"
+                          className="bg-white text-red-500 text-sm font-bold px-4 py-1.5 rounded-lg border border-red-200 hover:bg-red-50 transition-all"
                         >
                           Reject
                         </button>
@@ -389,12 +408,12 @@ const FriendsPage = () => {
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && handleSearch()}
                   placeholder="Search by name or email..."
-                  className="flex-1 bg-white bg-opacity-20 border border-white border-opacity-30 rounded-xl px-4 py-3 text-white placeholder-purple-300 focus:outline-none focus:border-purple-400 transition-all"
+                  className="flex-1 border border-gray-300 rounded-xl px-4 py-2.5 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
                 />
                 <button
                   onClick={handleSearch}
                   disabled={searching || searchQuery.trim().length < 2}
-                  className="bg-purple-600 text-white font-bold px-5 py-3 rounded-xl hover:bg-purple-500 disabled:bg-gray-600 transition-all"
+                  className="bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold px-5 py-2.5 rounded-xl hover:from-purple-500 hover:to-pink-500 disabled:from-gray-400 disabled:to-gray-500 transition-all shadow-lg"
                 >
                   {searching ? "..." : "Search"}
                 </button>
@@ -404,7 +423,7 @@ const FriendsPage = () => {
                 {searchResults.map((result) => (
                   <div
                     key={result._id}
-                    className="bg-white bg-opacity-10 backdrop-blur-lg rounded-2xl p-4 border border-white border-opacity-20"
+                    className="bg-white rounded-2xl p-4 shadow-lg border border-gray-100 hover:shadow-xl transition-all"
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
@@ -412,28 +431,28 @@ const FriendsPage = () => {
                           {result.firstName[0]}
                         </div>
                         <div>
-                          <p className="text-white font-semibold">
+                          <p className="text-gray-800 font-semibold">
                             {result.firstName} {result.lastName}
                           </p>
-                          <p className="text-purple-300 text-xs">
+                          <p className="text-gray-400 text-xs">
                             {result.email}
                           </p>
                         </div>
                       </div>
                       {result.friendship ? (
                         result.friendship.status === "accepted" ? (
-                          <span className="text-green-400 text-sm font-semibold">
+                          <span className="text-purple-600 text-sm font-semibold">
                             Friends ✓
                           </span>
                         ) : result.friendship.status === "pending" ? (
                           result.friendship.isRequester ? (
-                            <span className="text-yellow-300 text-sm">
+                            <span className="text-gray-400 text-sm">
                               Request Sent
                             </span>
                           ) : (
                             <button
                               onClick={() => handleSendRequest(result._id)}
-                              className="bg-green-500 text-white text-sm font-bold px-4 py-1.5 rounded-lg hover:bg-green-400 transition-all"
+                              className="bg-gradient-to-r from-purple-600 to-pink-600 text-white text-sm font-bold px-4 py-1.5 rounded-lg hover:from-purple-500 hover:to-pink-500 transition-all shadow-md"
                             >
                               Accept
                             </button>
@@ -442,7 +461,7 @@ const FriendsPage = () => {
                       ) : (
                         <button
                           onClick={() => handleSendRequest(result._id)}
-                          className="bg-gradient-to-r from-purple-600 to-pink-600 text-white text-sm font-bold px-4 py-1.5 rounded-lg hover:from-purple-500 hover:to-pink-500 transition-all"
+                          className="bg-gradient-to-r from-purple-600 to-pink-600 text-white text-sm font-bold px-4 py-1.5 rounded-lg hover:from-purple-500 hover:to-pink-500 transition-all shadow-md"
                         >
                           Add Friend
                         </button>

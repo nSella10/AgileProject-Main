@@ -134,8 +134,8 @@ const AnalyticsPage = () => {
                     {overview.totalSongs || 0}
                   </p>
                 </div>
-                <div className="bg-blue-100 p-3 rounded-2xl">
-                  <FaMusic className="text-blue-600 text-xl" />
+                <div className="bg-pink-100 p-3 rounded-2xl">
+                  <FaMusic className="text-pink-600 text-xl" />
                 </div>
               </div>
             </div>
@@ -150,8 +150,8 @@ const AnalyticsPage = () => {
                     {overview.avgSongsPerGame || 0}
                   </p>
                 </div>
-                <div className="bg-green-100 p-3 rounded-2xl">
-                  <FaChartLine className="text-green-600 text-xl" />
+                <div className="bg-indigo-100 p-3 rounded-2xl">
+                  <FaChartLine className="text-indigo-600 text-xl" />
                 </div>
               </div>
             </div>
@@ -167,8 +167,8 @@ const AnalyticsPage = () => {
                   </p>
                   <p className="text-xs text-gray-500">Last 30 days</p>
                 </div>
-                <div className="bg-orange-100 p-3 rounded-2xl">
-                  <FaClock className="text-orange-600 text-xl" />
+                <div className="bg-purple-100 p-3 rounded-2xl">
+                  <FaClock className="text-purple-600 text-xl" />
                 </div>
               </div>
             </div>
@@ -187,26 +187,26 @@ const AnalyticsPage = () => {
               </div>
 
               <div className="space-y-4">
-                <div className="flex items-center justify-between p-4 bg-green-50 rounded-2xl">
+                <div className="flex items-center justify-between p-4 bg-purple-50 rounded-2xl">
                   <div className="flex items-center gap-3">
-                    <FaGlobe className="text-green-600" />
+                    <FaGlobe className="text-purple-600" />
                     <span className="font-medium text-gray-700">
                       Public Games
                     </span>
                   </div>
-                  <span className="text-2xl font-bold text-green-600">
+                  <span className="text-2xl font-bold text-purple-600">
                     {overview.publicGames || 0}
                   </span>
                 </div>
 
-                <div className="flex items-center justify-between p-4 bg-orange-50 rounded-2xl">
+                <div className="flex items-center justify-between p-4 bg-gray-50 rounded-2xl">
                   <div className="flex items-center gap-3">
-                    <FaLock className="text-orange-600" />
+                    <FaLock className="text-gray-500" />
                     <span className="font-medium text-gray-700">
                       Private Games
                     </span>
                   </div>
-                  <span className="text-2xl font-bold text-orange-600">
+                  <span className="text-2xl font-bold text-gray-600">
                     {overview.privateGames || 0}
                   </span>
                 </div>
@@ -236,9 +236,9 @@ const AnalyticsPage = () => {
                     </span>
                     <span className="flex items-center gap-1">
                       {mostPopularGame.isPublic ? (
-                        <FaGlobe className="text-green-600" />
+                        <FaGlobe className="text-purple-600" />
                       ) : (
-                        <FaLock className="text-orange-600" />
+                        <FaLock className="text-gray-500" />
                       )}
                       {mostPopularGame.isPublic ? "Public" : "Private"}
                     </span>
@@ -285,8 +285,8 @@ const AnalyticsPage = () => {
           {recentActivity.length > 0 && (
             <div className="bg-white rounded-3xl p-8 shadow-xl border border-gray-100">
               <div className="flex items-center gap-3 mb-6">
-                <div className="bg-emerald-100 p-3 rounded-2xl">
-                  <FaClock className="text-emerald-600 text-xl" />
+                <div className="bg-purple-100 p-3 rounded-2xl">
+                  <FaClock className="text-purple-600 text-xl" />
                 </div>
                 <h2 className="text-2xl font-bold text-gray-800">
                   Recent Activity

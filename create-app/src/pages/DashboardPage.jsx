@@ -95,7 +95,7 @@ const DashboardPage = () => {
               <p className="text-gray-500 text-xs font-medium">Online Games</p>
             </div>
             <div className="bg-white rounded-2xl p-4 shadow-lg border border-gray-100 text-center">
-              <FaMusic className="text-green-500 text-xl mx-auto mb-1" />
+              <FaMusic className="text-purple-500 text-xl mx-auto mb-1" />
               <p className="text-2xl font-bold text-gray-800">Ready</p>
               <p className="text-gray-500 text-xs font-medium">To Play</p>
             </div>
@@ -214,7 +214,7 @@ const DashboardPage = () => {
                   className="group block bg-white rounded-2xl p-5 shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02]"
                 >
                   <div className="flex items-center gap-4">
-                    <div className="bg-gradient-to-r from-green-500 to-emerald-500 p-3 rounded-xl">
+                    <div className="bg-gradient-to-r from-purple-400 to-pink-400 p-3 rounded-xl">
                       <FaUsers className="text-white text-xl" />
                     </div>
                     <div className="flex-1">
@@ -225,7 +225,7 @@ const DashboardPage = () => {
                         Join a game in the same room with a code
                       </p>
                     </div>
-                    <FaArrowRight className="text-gray-400 group-hover:text-green-600 group-hover:translate-x-1 transition-all" />
+                    <FaArrowRight className="text-gray-400 group-hover:text-purple-600 group-hover:translate-x-1 transition-all" />
                   </div>
                 </a>
               </div>
@@ -292,7 +292,7 @@ const DashboardPage = () => {
                   className="group block bg-white rounded-2xl p-5 shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02]"
                 >
                   <div className="flex items-center gap-4">
-                    <div className="bg-gradient-to-r from-green-500 to-emerald-500 p-3 rounded-xl">
+                    <div className="bg-gradient-to-r from-purple-400 to-pink-400 p-3 rounded-xl">
                       <FaChartLine className="text-white text-xl" />
                     </div>
                     <div className="flex-1">
@@ -303,7 +303,7 @@ const DashboardPage = () => {
                         Track performance and player engagement
                       </p>
                     </div>
-                    <FaArrowRight className="text-gray-400 group-hover:text-green-600 group-hover:translate-x-1 transition-all" />
+                    <FaArrowRight className="text-gray-400 group-hover:text-purple-600 group-hover:translate-x-1 transition-all" />
                   </div>
                 </Link>
               </div>
