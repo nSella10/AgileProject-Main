@@ -1,18 +1,8 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
 
 const HomePage = () => {
   const navigate = useNavigate();
-  const { user, loading } = useAuth();
-
-  const handleOnlineClick = () => {
-    if (user) {
-      navigate("/online");
-    } else {
-      navigate("/online/auth");
-    }
-  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 flex items-center justify-center px-4 relative overflow-hidden">
@@ -35,62 +25,30 @@ const HomePage = () => {
           </p>
         </div>
 
-        {/* Mode Selection Cards */}
+        {/* Join Local Game */}
         <div className="space-y-4">
-          {/* Local Game - No auth required */}
           <button
             onClick={() => navigate("/join")}
-            className="w-full bg-white bg-opacity-10 backdrop-blur-lg rounded-2xl p-6 border border-white border-opacity-20 shadow-xl hover:bg-opacity-20 transition-all duration-300 transform hover:scale-105 text-left group"
+            className="w-full bg-gradient-to-r from-purple-600 to-pink-600 bg-opacity-80 backdrop-blur-lg rounded-2xl p-6 border border-purple-400 border-opacity-30 shadow-xl hover:from-purple-500 hover:to-pink-500 transition-all duration-300 transform hover:scale-105 text-left group"
           >
             <div className="flex items-center gap-4">
               <div className="text-4xl group-hover:scale-110 transition-transform">
                 🏠
               </div>
               <div>
-                <h2 className="text-xl font-bold text-white">Local Game</h2>
-                <p className="text-purple-200 text-sm mt-1">
-                  Join a game with a room code from your host
-                </p>
-                <p className="text-purple-300 text-xs mt-1">
-                  No account needed
-                </p>
-              </div>
-              <div className="ml-auto text-purple-300 text-2xl group-hover:translate-x-1 transition-transform">
-                →
-              </div>
-            </div>
-          </button>
-
-          {/* Online Game - Auth required */}
-          <button
-            onClick={handleOnlineClick}
-            className="w-full bg-gradient-to-r from-purple-600 to-pink-600 bg-opacity-80 backdrop-blur-lg rounded-2xl p-6 border border-purple-400 border-opacity-30 shadow-xl hover:from-purple-500 hover:to-pink-500 transition-all duration-300 transform hover:scale-105 text-left group"
-          >
-            <div className="flex items-center gap-4">
-              <div className="text-4xl group-hover:scale-110 transition-transform">
-                🌐
-              </div>
-              <div>
-                <h2 className="text-xl font-bold text-white">Online Game</h2>
+                <h2 className="text-xl font-bold text-white">
+                  Join a Game
+                </h2>
                 <p className="text-purple-100 text-sm mt-1">
-                  Play with people from around the world
+                  Enter a room code from your host to join a local game
                 </p>
                 <p className="text-purple-200 text-xs mt-1">
-                  {loading
-                    ? "..."
-                    : user
-                    ? `Signed in as ${user.firstName}`
-                    : "Sign in required"}
+                  No account needed
                 </p>
               </div>
               <div className="ml-auto text-white text-2xl group-hover:translate-x-1 transition-transform">
                 →
               </div>
-            </div>
-            <div className="mt-2 flex items-center gap-2">
-              <span className="bg-yellow-400 text-yellow-900 text-xs font-bold px-2 py-0.5 rounded-full">
-                NEW
-              </span>
             </div>
           </button>
         </div>

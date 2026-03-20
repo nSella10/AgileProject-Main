@@ -3,36 +3,31 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import HomePage from "./pages/HomePage";
 import JoinGamePage from "./pages/JoinGamePage";
-import OnlineAuthPage from "./pages/OnlineAuthPage";
-import OnlineLobbyPage from "./pages/OnlineLobbyPage";
+import OnlineEntryPage from "./pages/OnlineEntryPage";
 import OnlineGamePage from "./pages/OnlineGamePage";
-import FriendsPage from "./pages/FriendsPage";
 import NotFoundPage from "./pages/NotFoundPage";
 import ScrollToTop from "./components/ScrollToTop";
-import GameInviteNotification from "./components/GameInviteNotification";
 
-// Play App - Game participation platform
+// Play App - Session participation platform
+// Handles: local join by code, online game entry, and gameplay sessions
 function App() {
   return (
     <AuthProvider>
       <Router>
         <ScrollToTop />
         <Routes>
-          {/* Home - Mode selection */}
+          {/* Home - Local join entry */}
           <Route path="/" element={<HomePage />} />
 
           {/* Local Game - guest flow, no auth required */}
           <Route path="/join" element={<JoinGamePage />} />
 
-          {/* Online Game - authenticated flow */}
-          <Route path="/online/auth" element={<OnlineAuthPage />} />
-          <Route path="/online" element={<OnlineLobbyPage />} />
+          {/* Online Game - entry from authenticated hub (create-app) */}
+          <Route path="/online/entry" element={<OnlineEntryPage />} />
           <Route path="/online/game/:roomCode" element={<OnlineGamePage />} />
-          <Route path="/online/friends" element={<FriendsPage />} />
 
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
-        <GameInviteNotification />
       </Router>
     </AuthProvider>
   );

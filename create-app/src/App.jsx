@@ -9,15 +9,18 @@ import MyGamesPage from "./pages/MyGamesPage";
 import LaunchGamePage from "./pages/LaunchGamePage";
 import AnalyticsPage from "./pages/AnalyticsPage";
 import FinalLeaderboardPage from "./pages/FinalLeaderboardPage";
+import PlayOnlinePage from "./pages/PlayOnlinePage";
+import FriendsPage from "./pages/FriendsPage";
 
 import PrivateRoute from "./components/PrivateRoute";
 import RedirectIfLoggedIn from "./components/RedirectIfLoggedIn";
 import ScrollToTop from "./components/ScrollToTop";
 import AssistantChat from "./components/AssistantChat";
+import GameInviteNotification from "./components/GameInviteNotification";
 import NotFoundPage from "./pages/NotFoundPage";
 import { AssistantProvider } from "./context/AssistantContext";
 
-// Create App - Game creation and management platform
+// Guessify - Authenticated product hub
 function App() {
   return (
     <AssistantProvider>
@@ -34,6 +37,8 @@ function App() {
           {/* Protected Routes - All require authentication */}
           <Route element={<PrivateRoute />}>
             <Route path="/dashboard" element={<DashboardPage />} />
+            <Route path="/play-online" element={<PlayOnlinePage />} />
+            <Route path="/friends" element={<FriendsPage />} />
             <Route path="/create" element={<CreateGamePage />} />
             <Route path="/edit-game/:gameId" element={<EditGamePage />} />
             <Route path="/mygames" element={<MyGamesPage />} />
@@ -45,6 +50,7 @@ function App() {
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
         <AssistantChat />
+        <GameInviteNotification />
       </Router>
     </AssistantProvider>
   );

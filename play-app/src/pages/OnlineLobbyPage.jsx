@@ -177,7 +177,7 @@ const OnlineLobbyPage = () => {
 
       <div className="relative z-10 max-w-2xl mx-auto">
         {/* Header */}
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center justify-between mb-4">
           <button
             onClick={() => navigate("/")}
             className="text-purple-200 hover:text-white transition-colors text-lg"
@@ -185,21 +185,34 @@ const OnlineLobbyPage = () => {
             ← Back
           </button>
           <h1 className="text-2xl font-bold text-white">🌐 Online Games</h1>
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => navigate("/online/friends")}
-              className="bg-white bg-opacity-10 text-purple-200 hover:text-white hover:bg-opacity-20 text-sm px-3 py-1 rounded-lg transition-all"
-            >
-              👥 Friends
-            </button>
-            <button
-              onClick={handleLogout}
-              className="text-purple-300 hover:text-white text-sm transition-colors"
-            >
-              Logout
-            </button>
-          </div>
+          <button
+            onClick={handleLogout}
+            className="text-purple-300 hover:text-white text-sm transition-colors"
+          >
+            Logout
+          </button>
         </div>
+
+        {/* Friends Quick Access Bar */}
+        <button
+          onClick={() => navigate("/online/friends")}
+          className="w-full bg-white bg-opacity-10 backdrop-blur-lg rounded-2xl p-4 border border-white border-opacity-20 mb-6 hover:bg-opacity-15 transition-all group"
+        >
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <span className="text-2xl">👥</span>
+              <div className="text-left">
+                <p className="text-white font-semibold text-sm">Friends</p>
+                <p className="text-purple-300 text-xs">
+                  See who's online, send invites, join games
+                </p>
+              </div>
+            </div>
+            <span className="text-purple-300 group-hover:text-white group-hover:translate-x-1 transition-all text-lg">
+              →
+            </span>
+          </div>
+        </button>
 
         {/* User Info + Nickname */}
         <div className="bg-white bg-opacity-10 backdrop-blur-lg rounded-2xl p-4 border border-white border-opacity-20 mb-6">

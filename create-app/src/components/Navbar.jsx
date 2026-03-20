@@ -17,10 +17,11 @@ import {
   FaUserPlus,
   FaSignInAlt,
   FaNewspaper,
-  FaTachometerAlt,
   FaEnvelope,
   FaInfoCircle,
   FaList,
+  FaGlobe,
+  FaUserFriends,
 } from "react-icons/fa";
 
 const Navbar = () => {
@@ -64,9 +65,11 @@ const Navbar = () => {
 
   // Navigation items for authenticated users
   const authenticatedNavItems = [
+    { path: "/dashboard", label: "Home", icon: FaHome },
+    { path: "/play-online", label: "Play Online", icon: FaGlobe },
+    { path: "/friends", label: "Friends", icon: FaUserFriends },
     { path: "/create", label: "Create", icon: FaPlus },
     { path: "/mygames", label: "My Games", icon: FaList },
-    { path: "/dashboard", label: "Dashboard", icon: FaTachometerAlt },
     { path: "/analytics", label: "Analytics", icon: FaChartLine },
   ];
 

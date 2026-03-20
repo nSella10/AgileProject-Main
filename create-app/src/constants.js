@@ -11,3 +11,9 @@ export const GAMES_URL = `${BASE_URL}/api/games`;
 export const LESSONS_URL = `${BASE_URL}/api/lessons`;
 export const LYRICS_URL = `${BASE_URL}/api/lyrics`;
 export const ASSISTANT_URL = `${BASE_URL}/api/assistant`;
+export const FRIENDS_URL = `${BASE_URL}/api/friends`;
+
+export const PLAY_APP_URL =
+  process.env.NODE_ENV === "development"
+    ? "http://localhost:3002"
+    : "https://play.guessifyapp.com";
