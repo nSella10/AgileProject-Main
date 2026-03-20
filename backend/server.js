@@ -20,7 +20,7 @@ if (!process.env.OPENAI_API_KEY) {
   console.warn("⚠️ OPENAI_API_KEY not found in environment variables");
 }
 
-// Debug: Check if environment variables are loaded
+// Debug: Check if environment variables are loaded correct
 console.log("🔍 Environment check:");
 console.log("PORT:", process.env.PORT);
 console.log("MONGO_URI:", process.env.MONGO_URI ? "Found" : "Not found");
