@@ -1,6 +1,7 @@
 import rooms from "./roomStore.js";
 import Game from "../models/Game.js";
 import { generateRoomCode } from "../utils/generateRoomCode.js";
+import { setPresence } from "./presenceEvents.js";
 
 const availableEmojis = [
   "🐶", "🦊", "🐼", "🐵", "🐱", "🦁", "🐸", "🐻", "🦄", "🐯",
@@ -92,6 +93,10 @@ export function handleOnlineLobbyEvents(io, socket) {
       // Broadcast updated lobby to all
       broadcastLobbyUpdate(io);
 
+      // Update presence
+      const userId = socket.handshake.auth?.userId;
+      if (userId) setPresence(io, userId, "in_lobby", roomCode);
+
       console.log(`🌐 Online room ${roomCode} created by ${username} for game "${game.title}"`);
     } catch (err) {
       console.error("❌ Error creating online room:", err);
@@ -173,6 +178,10 @@ export function handleOnlineLobbyEvents(io, socket) {
     io.to(roomCode).emit("onlinePlayerUpdate", {
       players: getConnectedPlayersList(room),
     });
+
+    // Update presence
+    const userId = socket.handshake.auth?.userId;
+    if (userId) setPresence(io, userId, "in_lobby", roomCode);
 
     console.log(`🌐 ${username} joined online room ${roomCode} (${connectedPlayers.length + 1} players)`);
 
@@ -282,6 +291,15 @@ export function startOnlineGame(io, roomCode) {
   });
 
   room.currentTimeout = null;
+
+  // Update presence for all players to in_game
+  room.players.forEach((player) => {
+    if (player.status !== "disconnected") {
+      const pSocket = io.sockets.sockets.get(player.socketId);
+      const pUserId = pSocket?.handshake?.auth?.userId;
+      if (pUserId) setPresence(io, pUserId, "in_game", roomCode);
+    }
+  });
 
   io.to(roomCode).emit("onlineGameStarting", {
     totalSongs: room.songs.length,
@@ -510,6 +528,10 @@ export function handleOnlinePlayerLeave(io, socket, roomCode) {
 
   const player = room.players.find((p) => p.socketId === socket.id);
   if (!player) return;
+
+  // Update presence back to online
+  const leaveUserId = socket.handshake.auth?.userId;
+  if (leaveUserId) setPresence(io, leaveUserId, "online", null);
 
   console.log(`🌐 Player ${player.username} leaving online room ${roomCode}`);
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
 import { getSocket } from "../socket";
 import { BASE_URL } from "../constants";
@@ -7,6 +7,7 @@ import { useAuth } from "../context/AuthContext";
 
 const OnlineLobbyPage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user, loading: authLoading, logout } = useAuth();
 
   const [onlineRooms, setOnlineRooms] = useState([]);
@@ -41,10 +42,24 @@ const OnlineLobbyPage = () => {
     }
   }, []);
 
+  // Auto-join from invite
+  useEffect(() => {
+    const joinCode = location.state?.joinRoomCode;
+    if (joinCode && user && username.trim()) {
+      const socket = getSocket({ userId: user._id });
+      socket.emit("joinOnlineRoom", { roomCode: joinCode, username: username.trim() });
+      // Clear the state so it doesn't re-trigger
+      navigate("/online", { replace: true, state: {} });
+    }
+  }, [location.state, user, username, navigate]);
+
   useEffect(() => {
     if (!user) return;
 
     const socket = getSocket({ userId: user._id });
+
+    // Update presence to in_lobby
+    socket.emit("updatePresence", { status: "in_lobby" });
 
     // Request lobby data
     socket.emit("getOnlineRooms");
@@ -168,12 +183,20 @@ const OnlineLobbyPage = () => {
             ← Back
           </button>
           <h1 className="text-2xl font-bold text-white">🌐 Online Games</h1>
-          <button
-            onClick={handleLogout}
-            className="text-purple-300 hover:text-white text-sm transition-colors"
-          >
-            Logout
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => navigate("/online/friends")}
+              className="bg-white bg-opacity-10 text-purple-200 hover:text-white hover:bg-opacity-20 text-sm px-3 py-1 rounded-lg transition-all"
+            >
+              👥 Friends
+            </button>
+            <button
+              onClick={handleLogout}
+              className="text-purple-300 hover:text-white text-sm transition-colors"
+            >
+              Logout
+            </button>
+          </div>
         </div>
 
         {/* User Info + Nickname */}

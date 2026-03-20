@@ -2,6 +2,7 @@ import handleRoomEvents from "./roomEvents.js";
 import { handlePlayerEvents } from "./playerEvents.js";
 import { handleGameEvents } from "./gameEvents.js";
 import { handleOnlineLobbyEvents, handleOnlinePlayerLeave, broadcastLobbyUpdate } from "./onlineLobbyEvents.js";
+import { handlePresenceEvents, handlePresenceDisconnect, setPresence } from "./presenceEvents.js";
 import rooms from "../sockets/roomStore.js";
 
 const socketManager = (io) => {
@@ -15,8 +16,10 @@ const socketManager = (io) => {
     handlePlayerEvents(io, socket);
     handleGameEvents(io, socket);
     handleOnlineLobbyEvents(io, socket);
+    handlePresenceEvents(io, socket);
 
     socket.on("disconnect", () => {
+      handlePresenceDisconnect(io, socket);
       console.log(`❌ Client disconnected: ${socket.id}`);
 
       // Check if this socket is in an online room

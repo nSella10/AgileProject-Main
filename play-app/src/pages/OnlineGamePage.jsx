@@ -2,12 +2,16 @@ import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useParams, useLocation, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { getSocket } from "../socket";
+import { useAuth } from "../context/AuthContext";
+import { BASE_URL } from "../constants";
 import GamePlayScreen from "../components/GameFlow/GamePlayScreen";
 
 const OnlineGamePage = () => {
   const { roomCode } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
+
+  const { user } = useAuth();
 
   // From navigation state
   const initState = location.state || {};
@@ -40,6 +44,12 @@ const OnlineGamePage = () => {
   const [statusMsg, setStatusMsg] = useState("");
   const [currentSongTitle, setCurrentSongTitle] = useState("");
   const [leaderboard, setLeaderboard] = useState(null);
+
+  // Invite friends state
+  const [showInviteModal, setShowInviteModal] = useState(false);
+  const [friendsList, setFriendsList] = useState([]);
+  const [friendsPresence, setFriendsPresence] = useState({});
+  const [invitedFriends, setInvitedFriends] = useState(new Set());
 
   // Audio ref for playing songs on player device
   const audioRef = useRef(null);
@@ -299,6 +309,27 @@ const OnlineGamePage = () => {
     socket.emit("startOnlineGame", { roomCode });
   };
 
+  const handleOpenInvite = async () => {
+    setShowInviteModal(true);
+    try {
+      const res = await fetch(`${BASE_URL}/api/friends`, { credentials: "include" });
+      const data = await res.json();
+      setFriendsList(data);
+      const socket = getSocket();
+      socket.emit("getFriendsPresence");
+      socket.on("friendsPresence", (p) => setFriendsPresence(p));
+    } catch (err) {
+      console.error("Failed to fetch friends:", err);
+    }
+  };
+
+  const handleInviteFriend = (friendId) => {
+    const socket = getSocket();
+    socket.emit("inviteFriend", { friendUserId: friendId, roomCode });
+    setInvitedFriends((prev) => new Set([...prev, friendId]));
+    toast.success("Invite sent!");
+  };
+
   const handleLeaveRoom = () => {
     const socket = getSocket();
     socket.emit("leaveOnlineRoom", { roomCode });
@@ -397,14 +428,107 @@ const OnlineGamePage = () => {
               </div>
             )}
 
-            {/* Leave button */}
-            <button
-              onClick={handleLeaveRoom}
-              className="mt-4 text-purple-300 hover:text-white text-sm underline transition-colors"
-            >
-              Leave Room
-            </button>
+            {/* Invite Friends + Leave buttons */}
+            <div className="flex items-center justify-center gap-4 mt-4">
+              {user && (
+                <button
+                  onClick={handleOpenInvite}
+                  className="bg-white bg-opacity-10 text-purple-200 hover:text-white hover:bg-opacity-20 text-sm px-4 py-2 rounded-lg transition-all"
+                >
+                  👥 Invite Friends
+                </button>
+              )}
+              <button
+                onClick={handleLeaveRoom}
+                className="text-purple-300 hover:text-white text-sm underline transition-colors"
+              >
+                Leave Room
+              </button>
+            </div>
           </div>
+
+          {/* Invite Friends Modal */}
+          {showInviteModal && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 px-4">
+              <div className="bg-gradient-to-br from-indigo-800 to-purple-900 rounded-2xl p-5 border border-white border-opacity-20 shadow-2xl max-w-sm w-full max-h-[70vh] overflow-y-auto">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-white font-bold text-lg">Invite Friends</h3>
+                  <button
+                    onClick={() => setShowInviteModal(false)}
+                    className="text-purple-300 hover:text-white text-xl"
+                  >
+                    ✕
+                  </button>
+                </div>
+
+                {friendsList.length === 0 ? (
+                  <div className="text-center py-6">
+                    <p className="text-purple-200 text-sm">No friends yet.</p>
+                    <button
+                      onClick={() => {
+                        setShowInviteModal(false);
+                        navigate("/online/friends");
+                      }}
+                      className="mt-2 text-purple-300 hover:text-white text-sm underline"
+                    >
+                      Find friends
+                    </button>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {friendsList.map((friend) => {
+                      const p = friendsPresence[friend._id] || { status: "offline" };
+                      const isOnline = p.status !== "offline";
+                      const alreadyInvited = invitedFriends.has(friend._id);
+                      return (
+                        <div
+                          key={friend._id}
+                          className="bg-white bg-opacity-10 rounded-xl px-3 py-2 flex items-center justify-between"
+                        >
+                          <div className="flex items-center gap-2">
+                            <div className="relative">
+                              <div className="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center text-white text-sm font-bold">
+                                {friend.firstName[0]}
+                              </div>
+                              <div
+                                className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 ${
+                                  isOnline ? "bg-green-400" : "bg-gray-400"
+                                } rounded-full border-2 border-purple-900`}
+                              ></div>
+                            </div>
+                            <div>
+                              <p className="text-white text-sm font-semibold">
+                                {friend.firstName}
+                              </p>
+                              <p className="text-purple-300 text-xs">
+                                {p.status === "offline"
+                                  ? "Offline"
+                                  : p.status === "in_game"
+                                  ? "In Game"
+                                  : "Online"}
+                              </p>
+                            </div>
+                          </div>
+                          {alreadyInvited ? (
+                            <span className="text-green-400 text-xs">Invited ✓</span>
+                          ) : isOnline ? (
+                            <button
+                              onClick={() => handleInviteFriend(friend._id)}
+                              className="bg-green-500 text-white text-xs font-bold px-3 py-1 rounded-lg hover:bg-green-400 transition-all"
+                            >
+                              Invite
+                            </button>
+                          ) : (
+                            <span className="text-gray-400 text-xs">Offline</span>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
         </div>
       </div>
     );
