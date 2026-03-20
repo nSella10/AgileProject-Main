@@ -15,10 +15,12 @@ import {
   FaStar,
   FaHeadphones,
 } from "react-icons/fa";
+import { useAssistantContext } from "../context/AssistantContext";
 
 const EditGamePage = () => {
   const { gameId } = useParams();
   const navigate = useNavigate();
+  const { updatePageContext } = useAssistantContext();
 
   const {
     game,
@@ -26,6 +28,20 @@ const EditGamePage = () => {
     error: gameError,
   } = useGameWithState(gameId);
   const { updateGame, isLoading: updateLoading } = useUpdateGameWithState();
+
+  // Update assistant context when game loads
+  useEffect(() => {
+    if (game) {
+      updatePageContext({
+        page: "EditGamePage",
+        currentGameId: game._id,
+        currentGameTitle: game.title,
+      });
+    }
+    return () => {
+      updatePageContext({ page: null, currentGameId: null, currentGameTitle: null });
+    };
+  }, [game, updatePageContext]);
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");

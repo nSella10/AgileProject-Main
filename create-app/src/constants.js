@@ -10,3 +10,4 @@ export const USERS_URL = `${BASE_URL}/api/users`;
 export const GAMES_URL = `${BASE_URL}/api/games`;
 export const LESSONS_URL = `${BASE_URL}/api/lessons`;
 export const LYRICS_URL = `${BASE_URL}/api/lyrics`;
+export const ASSISTANT_URL = `${BASE_URL}/api/assistant`;

@@ -15,8 +15,16 @@ import {
   FaHeadphones,
 } from "react-icons/fa";
 import { toast } from "react-toastify";
+import { useAssistantContext } from "../context/AssistantContext";
 
 const CreateGamePage = () => {
+  const { updatePageContext } = useAssistantContext();
+
+  // Set page context for assistant
+  React.useEffect(() => {
+    updatePageContext({ page: "CreateGamePage", currentGameId: null, currentGameTitle: null });
+    return () => updatePageContext({ page: null });
+  }, [updatePageContext]);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [selectedSongs, setSelectedSongs] = useState([]);

@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(lsof -ti:8000)",
+      "Bash(nvm ls)",
+      "Bash(node -pe \"JSON.parse\\(require\\(''fs''\\).readFileSync\\(''/dev/stdin'',''utf8''\\)\\).dependencies[''@angular/core''] || ''not found''\")",
+      "Read(//Users/omripeer/Documents/Omri/תואר ראשון במדעי המחשב - מכללת אפקה/שנים א-ג/סמסטר ב/Agile/**)",
+      "Read(//Users/omripeer/Documents/Omri/תואר ראשון במדעי המחשב - מכללת אפקה/שנים א-ג/סנה ג/סמסטר ב/Agile/Music App/backend/**)",
+      "Bash(npx vite build)",
+      "Bash(node_modules/.bin/vite build)",
+      "Bash(ls node_modules/.bin/vite*)",
+      "Bash(npm run build)",
+      "Bash(node -e \":*)"
+    ]
+  }
+}

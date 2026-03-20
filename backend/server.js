@@ -36,6 +36,7 @@ import userRoutes from "./routes/userRoutes.js";
 import gameRoutes from "./routes/gameRoutes.js";
 import lessonRoutes from "./routes/lessonRoutes.js";
 import lyricsRoutes from "./routes/lyricsRoutes.js";
+import assistantRoutes from "./routes/assistantRoutes.js";
 import { notFound, errorHandler } from "./middlewares/errorMiddleware.js";
 import socketManager from "./sockets/index.js";
 import cookieParser from "cookie-parser";
@@ -86,6 +87,7 @@ app.use("/api/users", userRoutes);
 app.use("/api/games", gameRoutes);
 app.use("/api/lessons", lessonRoutes);
 app.use("/api/lyrics", lyricsRoutes);
+app.use("/api/assistant", assistantRoutes);
 
 // 🧱 API-only server - Frontend apps are served separately from S3
 // No longer serving static files - apps are deployed to:

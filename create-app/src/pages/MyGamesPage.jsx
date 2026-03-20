@@ -12,11 +12,19 @@ import {
 } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import { useAssistantContext } from "../context/AssistantContext";
 
 const MyGames = () => {
   const { games, isLoading, error } = useGamesWithState();
   const { deleteGame } = useDeleteGameWithState();
   const navigate = useNavigate();
+  const { updatePageContext } = useAssistantContext();
+
+  // Set page context for assistant
+  React.useEffect(() => {
+    updatePageContext({ page: "MyGamesPage", currentGameId: null, currentGameTitle: null });
+    return () => updatePageContext({ page: null });
+  }, [updatePageContext]);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [gameToDelete, setGameToDelete] = useState(null);
 
