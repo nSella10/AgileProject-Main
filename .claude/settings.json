@@ -10,7 +10,8 @@
       "Bash(node_modules/.bin/vite build)",
       "Bash(ls node_modules/.bin/vite*)",
       "Bash(npm run build)",
-      "Bash(node -e \":*)"
+      "Bash(node -e \":*)",
+      "Bash(npx react-scripts build)"
     ]
   }
 }

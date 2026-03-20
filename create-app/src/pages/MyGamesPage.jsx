@@ -9,6 +9,7 @@ import {
   FaPlay,
   FaTimes,
   FaCheck,
+  FaGlobe,
 } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -205,6 +206,22 @@ const MyGames = () => {
                       <FaPlay />
                       Play
                     </button>
+                  </div>
+
+                  {/* Online Availability Toggle */}
+                  <div className="mt-2">
+                    <span
+                      className={`inline-flex items-center gap-1 text-xs px-3 py-1 rounded-full ${
+                        game.isPublic
+                          ? "bg-green-500 bg-opacity-20 text-green-300 border border-green-500 border-opacity-30"
+                          : "bg-gray-500 bg-opacity-20 text-gray-300 border border-gray-500 border-opacity-30"
+                      }`}
+                    >
+                      <FaGlobe />
+                      {game.isPublic
+                        ? "Available in Online Lobby"
+                        : "Not available online (set Public to enable)"}
+                    </span>
                   </div>
                 </div>
               ))}

@@ -50,6 +50,16 @@ export const authUser = asyncHandler(async (req, res) => {
   }
 });
 
+// Get current user profile
+export const getMe = asyncHandler(async (req, res) => {
+  res.json({
+    _id: req.user._id,
+    firstName: req.user.firstName,
+    lastName: req.user.lastName,
+    email: req.user.email,
+  });
+});
+
 // Logout user
 export const logoutUser = asyncHandler(async (req, res) => {
   res.cookie("jwt", "", {
