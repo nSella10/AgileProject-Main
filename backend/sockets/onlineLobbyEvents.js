@@ -1,5 +1,6 @@
 import rooms from "./roomStore.js";
 import Game from "../models/Game.js";
+import Friendship from "../models/Friendship.js";
 import { generateRoomCode } from "../utils/generateRoomCode.js";
 import { setPresence } from "./presenceEvents.js";
 
@@ -12,11 +13,11 @@ const MAX_PLAYERS = 8;
 const AUTO_START_COUNTDOWN = 10; // seconds
 
 export function handleOnlineLobbyEvents(io, socket) {
-  // Get list of online games waiting for players
+  // Get list of online games waiting for players (public only)
   socket.on("getOnlineRooms", () => {
     const onlineRooms = [];
     for (const [code, room] of rooms.entries()) {
-      if (room.isOnline) {
+      if (room.isOnline && (room.visibility || "public") === "public") {
         onlineRooms.push({
           roomCode: code,
           title: room.game?.title || "Untitled Game",
@@ -26,6 +27,7 @@ export function handleOnlineLobbyEvents(io, socket) {
           songCount: room.game?.songs?.length || 0,
           guessTimeLimit: room.game?.guessTimeLimit || 15,
           creatorUsername: room.creatorUsername || "Anonymous",
+          visibility: "public",
         });
       }
     }
@@ -33,7 +35,7 @@ export function handleOnlineLobbyEvents(io, socket) {
   });
 
   // Create an online game room from a public game
-  socket.on("createOnlineRoom", async ({ gameId, username }) => {
+  socket.on("createOnlineRoom", async ({ gameId, username, visibility }) => {
     try {
       const game = await Game.findById(gameId);
       if (!game) {
@@ -46,8 +48,14 @@ export function handleOnlineLobbyEvents(io, socket) {
         return;
       }
 
+      // Validate visibility
+      const roomVisibility = ["public", "friends", "private"].includes(visibility)
+        ? visibility
+        : "public";
+
       const roomCode = generateRoomCode();
       const assignedEmoji = availableEmojis[0];
+      const creatorUserId = socket.handshake.auth?.userId || null;
 
       const creator = {
         socketId: socket.id,
@@ -55,12 +63,14 @@ export function handleOnlineLobbyEvents(io, socket) {
         emoji: assignedEmoji,
         status: "connected",
         isCreator: true,
+        userId: creatorUserId,
       };
 
       rooms.set(roomCode, {
         isOnline: true,
         creatorSocketId: socket.id,
         creatorUsername: username,
+        creatorUserId,
         hostSocketId: null, // no host in online mode - server controls
         gameId: game._id.toString(),
         game,
@@ -72,6 +82,8 @@ export function handleOnlineLobbyEvents(io, socket) {
         playerAnswerTimes: {},
         playerAnswers: {},
         status: "waiting",
+        visibility: roomVisibility,
+        invitedUserIds: new Set(),
         minPlayers: MIN_PLAYERS,
         maxPlayers: MAX_PLAYERS,
         autoStartTimer: null,
@@ -88,6 +100,7 @@ export function handleOnlineLobbyEvents(io, socket) {
         guessTimeLimit: game.guessTimeLimit,
         guessInputMethod: game.guessInputMethod,
         songCount: game.songs.length,
+        visibility: roomVisibility,
       });
 
       // Broadcast updated lobby to all
@@ -105,7 +118,7 @@ export function handleOnlineLobbyEvents(io, socket) {
   });
 
   // Join an existing online room
-  socket.on("joinOnlineRoom", ({ roomCode, username }) => {
+  socket.on("joinOnlineRoom", async ({ roomCode, username }) => {
     const room = rooms.get(roomCode);
     if (!room || !room.isOnline) {
       socket.emit("onlineError", "Online room not found");
@@ -121,6 +134,27 @@ export function handleOnlineLobbyEvents(io, socket) {
     if (connectedPlayers.length >= MAX_PLAYERS) {
       socket.emit("onlineError", "Room is full");
       return;
+    }
+
+    // --- Access control based on room visibility ---
+    const joinerUserId = socket.handshake.auth?.userId;
+    const roomVis = room.visibility || "public";
+
+    if (roomVis === "friends" && joinerUserId !== room.creatorUserId) {
+      // Check if joiner is friends with creator
+      const isFriend = await checkFriendship(joinerUserId, room.creatorUserId);
+      if (!isFriend) {
+        socket.emit("onlineError", "This room is friends-only. You must be friends with the host to join.");
+        return;
+      }
+    }
+
+    if (roomVis === "private" && joinerUserId !== room.creatorUserId) {
+      // Check if joiner was explicitly invited
+      if (!room.invitedUserIds || !room.invitedUserIds.has(joinerUserId)) {
+        socket.emit("onlineError", "This is a private room. You need an invite to join.");
+        return;
+      }
     }
 
     // Check if username already taken
@@ -158,6 +192,7 @@ export function handleOnlineLobbyEvents(io, socket) {
       emoji: assignedEmoji,
       status: "connected",
       isCreator: false,
+      userId: joinerUserId,
     };
     room.players.push(newPlayer);
 
@@ -600,7 +635,7 @@ export function handleOnlinePlayerLeave(io, socket, roomCode) {
 export function broadcastLobbyUpdate(io) {
   const onlineRooms = [];
   for (const [code, room] of rooms.entries()) {
-    if (room.isOnline) {
+    if (room.isOnline && (room.visibility || "public") === "public") {
       onlineRooms.push({
         roomCode: code,
         title: room.game?.title || "Untitled Game",
@@ -610,8 +645,38 @@ export function broadcastLobbyUpdate(io) {
         songCount: room.game?.songs?.length || 0,
         guessTimeLimit: room.game?.guessTimeLimit || 15,
         creatorUsername: room.creatorUsername || "Anonymous",
+        visibility: "public",
       });
     }
   }
   io.emit("onlineLobbyUpdate", onlineRooms);
+}
+
+// Helper to check if two users are friends
+async function checkFriendship(userId1, userId2) {
+  if (!userId1 || !userId2) return false;
+  try {
+    const friendship = await Friendship.findOne({
+      $or: [
+        { requester: userId1, recipient: userId2 },
+        { requester: userId2, recipient: userId1 },
+      ],
+      status: "accepted",
+    });
+    return !!friendship;
+  } catch (err) {
+    console.error("Error checking friendship:", err);
+    return false;
+  }
+}
+
+// Helper to get room visibility info for a specific room
+export function getRoomVisibility(roomCode) {
+  const room = rooms.get(roomCode);
+  if (!room || !room.isOnline) return null;
+  return {
+    visibility: room.visibility || "public",
+    creatorUserId: room.creatorUserId,
+    invitedUserIds: room.invitedUserIds ? [...room.invitedUserIds] : [],
+  };
 }

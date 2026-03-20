@@ -21,6 +21,7 @@ const OnlineGamePage = () => {
   const [isCreator] = useState(initState.isCreator || false);
   const [songCount] = useState(initState.songCount || 0);
   const [guessInputMethod] = useState(initState.guessInputMethod || "freeText");
+  const [visibility] = useState(initState.visibility || "public");
 
   // Waiting room state
   const [players, setPlayers] = useState(initState.players || []);
@@ -357,6 +358,15 @@ const OnlineGamePage = () => {
               <p className="text-purple-200 text-sm">
                 🎵 {songCount} songs
               </p>
+              {visibility !== "public" && (
+                <span className={`inline-block mt-1 text-xs font-bold px-2 py-0.5 rounded-full ${
+                  visibility === "friends"
+                    ? "bg-yellow-500 bg-opacity-30 text-yellow-200 border border-yellow-400 border-opacity-30"
+                    : "bg-red-500 bg-opacity-30 text-red-200 border border-red-400 border-opacity-30"
+                }`}>
+                  {visibility === "friends" ? "👥 Friends Only" : "🔒 Private"}
+                </span>
+              )}
             </div>
 
             {/* Your info */}

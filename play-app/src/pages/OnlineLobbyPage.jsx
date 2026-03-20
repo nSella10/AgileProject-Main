@@ -16,6 +16,7 @@ const OnlineLobbyPage = () => {
   const [username, setUsername] = useState("");
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState("rooms"); // "rooms" | "create"
+  const [roomVisibility, setRoomVisibility] = useState("public"); // "public" | "friends" | "private"
 
   // Redirect to auth page if not authenticated
   useEffect(() => {
@@ -86,6 +87,7 @@ const OnlineLobbyPage = () => {
           guessInputMethod: data.guessInputMethod,
           songCount: data.songCount,
           isCreator: true,
+          visibility: data.visibility || "public",
         },
       });
     });
@@ -132,7 +134,7 @@ const OnlineLobbyPage = () => {
       return;
     }
     const socket = getSocket({ userId: user?._id });
-    socket.emit("createOnlineRoom", { gameId, username: username.trim() });
+    socket.emit("createOnlineRoom", { gameId, username: username.trim(), visibility: roomVisibility });
   };
 
   const handleJoinRoom = (roomCode) => {
@@ -308,6 +310,34 @@ const OnlineLobbyPage = () => {
 
         {tab === "create" && (
           <div className="space-y-3">
+            {/* Room Visibility Selector */}
+            <div className="bg-white bg-opacity-10 backdrop-blur-lg rounded-2xl p-4 border border-white border-opacity-20">
+              <label className="text-purple-200 text-sm font-semibold mb-2 block">
+                Room Visibility
+              </label>
+              <div className="flex gap-2">
+                {[
+                  { value: "public", label: "Public", icon: "🌐", desc: "Anyone can join" },
+                  { value: "friends", label: "Friends", icon: "👥", desc: "Friends only" },
+                  { value: "private", label: "Private", icon: "🔒", desc: "Invite only" },
+                ].map((opt) => (
+                  <button
+                    key={opt.value}
+                    onClick={() => setRoomVisibility(opt.value)}
+                    className={`flex-1 py-2 px-2 rounded-xl text-center transition-all ${
+                      roomVisibility === opt.value
+                        ? "bg-purple-600 text-white border border-purple-400"
+                        : "bg-white bg-opacity-10 text-purple-200 hover:bg-opacity-20 border border-transparent"
+                    }`}
+                  >
+                    <div className="text-lg">{opt.icon}</div>
+                    <div className="text-xs font-semibold mt-0.5">{opt.label}</div>
+                    <div className="text-[10px] opacity-70 mt-0.5">{opt.desc}</div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
             {publicGames.length === 0 ? (
               <div className="bg-white bg-opacity-10 backdrop-blur-lg rounded-2xl p-8 border border-white border-opacity-20 text-center">
                 <div className="text-4xl mb-4">📝</div>

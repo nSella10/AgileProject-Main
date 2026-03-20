@@ -72,10 +72,10 @@ const FriendsPage = () => {
       setFriendsPresence(data);
     });
 
-    socket.on("friendPresenceUpdate", ({ userId: uid, status, roomCode }) => {
+    socket.on("friendPresenceUpdate", ({ userId: uid, status, roomCode, roomVisibility }) => {
       setFriendsPresence((prev) => ({
         ...prev,
-        [uid]: { status, roomCode },
+        [uid]: { status, roomCode, roomVisibility },
       }));
     });
 
@@ -267,8 +267,15 @@ const FriendsPage = () => {
                 const p = friendsPresence[friend._id] || {
                   status: "offline",
                   roomCode: null,
+                  roomVisibility: null,
                 };
                 const presenceInfo = PRESENCE_LABELS[p.status] || PRESENCE_LABELS.offline;
+                // Show Join Game for public/friends rooms (we're friends, so friends-only is OK)
+                // Don't show for private rooms (need explicit invite)
+                const canShowJoin =
+                  p.status === "in_lobby" &&
+                  p.roomCode &&
+                  (p.roomVisibility || "public") !== "private";
                 return (
                   <div
                     key={friend.friendshipId}
@@ -290,17 +297,26 @@ const FriendsPage = () => {
                           </p>
                           <p className="text-purple-300 text-xs">
                             {presenceInfo.text}
+                            {p.status === "in_lobby" && p.roomVisibility === "private" && (
+                              <span className="ml-1 text-red-300">🔒</span>
+                            )}
+                            {p.status === "in_lobby" && p.roomVisibility === "friends" && (
+                              <span className="ml-1 text-yellow-300">👥</span>
+                            )}
                           </p>
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
-                        {p.status === "in_lobby" && p.roomCode && (
+                        {canShowJoin && (
                           <button
                             onClick={() => handleJoinFriendGame(p.roomCode)}
                             className="bg-green-500 text-white text-xs font-bold px-3 py-1.5 rounded-lg hover:bg-green-400 transition-all"
                           >
                             Join Game
                           </button>
+                        )}
+                        {p.status === "in_lobby" && p.roomVisibility === "private" && (
+                          <span className="text-purple-400 text-xs">Invite only</span>
                         )}
                         <button
                           onClick={() =>
