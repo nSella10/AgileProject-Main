@@ -17,10 +17,11 @@ import {
   FaUserPlus,
   FaSignInAlt,
   FaNewspaper,
-  FaTachometerAlt,
   FaEnvelope,
   FaInfoCircle,
   FaList,
+  FaGlobe,
+  FaUserFriends,
 } from "react-icons/fa";
 
 const Navbar = () => {
@@ -64,9 +65,11 @@ const Navbar = () => {
 
   // Navigation items for authenticated users
   const authenticatedNavItems = [
+    { path: "/dashboard", label: "Home", icon: FaHome },
+    { path: "/play-online", label: "Play Online", icon: FaGlobe },
+    { path: "/friends", label: "Friends", icon: FaUserFriends },
     { path: "/create", label: "Create", icon: FaPlus },
     { path: "/mygames", label: "My Games", icon: FaList },
-    { path: "/dashboard", label: "Dashboard", icon: FaTachometerAlt },
     { path: "/analytics", label: "Analytics", icon: FaChartLine },
   ];
 
@@ -130,12 +133,9 @@ const Navbar = () => {
           {/* News Button - Desktop */}
           <div className="hidden lg:flex items-center space-x-4">
             <Link to="/blog">
-              <button className="bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white px-4 py-2 rounded-xl font-medium transition-all duration-300 flex items-center space-x-2 shadow-lg hover:shadow-xl transform hover:scale-105">
+              <button className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-400 hover:to-pink-400 text-white px-4 py-2 rounded-xl font-medium transition-all duration-300 flex items-center space-x-2 shadow-lg hover:shadow-xl transform hover:scale-105">
                 <FaNewspaper className="text-sm" />
                 <span className="text-sm">News</span>
-                <span className="bg-red-500 text-xs px-2 py-1 rounded-full animate-pulse">
-                  3
-                </span>
               </button>
             </Link>
           </div>
@@ -165,7 +165,7 @@ const Navbar = () => {
               <>
                 {/* Sign Up Button */}
                 <Link to="/register">
-                  <button className="flex items-center space-x-2 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white px-6 py-2 rounded-xl font-medium transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105">
+                  <button className="flex items-center space-x-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white px-6 py-2 rounded-xl font-medium transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105">
                     <FaUserPlus className="text-sm" />
                     <span className="text-sm">Sign up FREE</span>
                   </button>
@@ -210,12 +210,9 @@ const Navbar = () => {
 
             {/* News Button - Mobile */}
             <Link to="/blog" className="block mb-4">
-              <button className="w-full bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white py-3 px-4 rounded-xl font-medium transition-all duration-300 flex items-center justify-center space-x-2 shadow-lg">
+              <button className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-400 hover:to-pink-400 text-white py-3 px-4 rounded-xl font-medium transition-all duration-300 flex items-center justify-center space-x-2 shadow-lg">
                 <FaNewspaper />
                 <span>News</span>
-                <span className="bg-red-500 text-xs px-2 py-1 rounded-full animate-pulse">
-                  3
-                </span>
               </button>
             </Link>
 
@@ -263,7 +260,7 @@ const Navbar = () => {
               ) : (
                 <div className="space-y-3">
                   <Link to="/register">
-                    <button className="w-full flex items-center justify-center space-x-2 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white py-3 px-4 rounded-xl font-medium transition-all duration-300 shadow-lg">
+                    <button className="w-full flex items-center justify-center space-x-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white py-3 px-4 rounded-xl font-medium transition-all duration-300 shadow-lg">
                       <FaUserPlus />
                       <span>Sign up FREE</span>
                     </button>

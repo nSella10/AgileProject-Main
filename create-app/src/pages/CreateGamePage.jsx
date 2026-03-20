@@ -241,7 +241,7 @@ const CreateGamePage = () => {
                         className="w-5 h-5 text-purple-600"
                       />
                       <div className="flex items-center gap-2">
-                        <FaGlobe className="text-green-600" />
+                        <FaGlobe className="text-purple-600" />
                         <span className="font-medium text-gray-700">
                           Public
                         </span>
@@ -259,7 +259,7 @@ const CreateGamePage = () => {
                         className="w-5 h-5 text-purple-600"
                       />
                       <div className="flex items-center gap-2">
-                        <FaLock className="text-orange-600" />
+                        <FaLock className="text-gray-500" />
                         <span className="font-medium text-gray-700">
                           Private
                         </span>
@@ -270,7 +270,7 @@ const CreateGamePage = () => {
                 </div>
 
                 {/* Guess Time Limit */}
-                <div className="p-4 sm:p-6 bg-blue-50 rounded-2xl">
+                <div className="p-4 sm:p-6 bg-purple-50 rounded-2xl">
                   <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
                     ⏱️ Guess Time Limit
                   </h3>
@@ -281,7 +281,7 @@ const CreateGamePage = () => {
                         name="guessTime"
                         checked={guessTimeLimit === 15}
                         onChange={() => setGuessTimeLimit(15)}
-                        className="w-5 h-5 text-blue-600"
+                        className="w-5 h-5 text-purple-600"
                       />
                       <span className="font-medium text-gray-700">
                         15 seconds
@@ -296,7 +296,7 @@ const CreateGamePage = () => {
                         name="guessTime"
                         checked={guessTimeLimit === 30}
                         onChange={() => setGuessTimeLimit(30)}
-                        className="w-5 h-5 text-blue-600"
+                        className="w-5 h-5 text-purple-600"
                       />
                       <span className="font-medium text-gray-700">
                         30 seconds
@@ -309,7 +309,7 @@ const CreateGamePage = () => {
                         name="guessTime"
                         checked={guessTimeLimit === 45}
                         onChange={() => setGuessTimeLimit(45)}
-                        className="w-5 h-5 text-blue-600"
+                        className="w-5 h-5 text-purple-600"
                       />
                       <span className="font-medium text-gray-700">
                         45 seconds
@@ -322,7 +322,7 @@ const CreateGamePage = () => {
                         name="guessTime"
                         checked={guessTimeLimit === 60}
                         onChange={() => setGuessTimeLimit(60)}
-                        className="w-5 h-5 text-blue-600"
+                        className="w-5 h-5 text-purple-600"
                       />
                       <span className="font-medium text-gray-700">
                         60 seconds
@@ -336,7 +336,7 @@ const CreateGamePage = () => {
                 </div>
 
                 {/* Guess Input Method */}
-                <div className="p-4 sm:p-6 bg-green-50 rounded-2xl">
+                <div className="p-4 sm:p-6 bg-pink-50 rounded-2xl">
                   <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
                     ✏️ Guess Input Method
                   </h3>
@@ -347,7 +347,7 @@ const CreateGamePage = () => {
                         name="guessInputMethod"
                         checked={guessInputMethod === "freeText"}
                         onChange={() => setGuessInputMethod("freeText")}
-                        className="w-5 h-5 text-green-600 mt-1"
+                        className="w-5 h-5 text-purple-600 mt-1"
                       />
                       <div>
                         <span className="font-medium text-gray-700 block">
@@ -364,7 +364,7 @@ const CreateGamePage = () => {
                         name="guessInputMethod"
                         checked={guessInputMethod === "letterClick"}
                         onChange={() => setGuessInputMethod("letterClick")}
-                        className="w-5 h-5 text-green-600 mt-1"
+                        className="w-5 h-5 text-purple-600 mt-1"
                       />
                       <div>
                         <span className="font-medium text-gray-700 block">
@@ -387,12 +387,12 @@ const CreateGamePage = () => {
             {/* Songs Card */}
             <div className="bg-white rounded-3xl p-4 sm:p-8 shadow-xl border border-gray-100">
               <div className="flex items-center gap-3 mb-6">
-                <div className="bg-blue-100 p-3 rounded-2xl">
-                  <FaHeadphones className="text-blue-600 text-xl" />
+                <div className="bg-pink-100 p-3 rounded-2xl">
+                  <FaHeadphones className="text-pink-600 text-xl" />
                 </div>
                 <h2 className="text-2xl font-bold text-gray-800">Add Songs</h2>
                 {selectedSongs.length > 0 && (
-                  <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
+                  <span className="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm font-medium">
                     {selectedSongs.length} song
                     {selectedSongs.length !== 1 ? "s" : ""} selected
                   </span>
@@ -515,14 +515,14 @@ const CreateGamePage = () => {
             </div>
 
             {/* Instructions with beautiful styling */}
-            <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-2xl p-4 mb-6">
+            <div className="bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-200 rounded-2xl p-4 mb-6">
               <div className="flex items-center gap-3">
                 <div className="text-2xl">💡</div>
                 <div className="flex-1">
                   <p className="text-sm text-gray-700 leading-relaxed">
                     Click the{" "}
-                    <span className="inline-flex items-center gap-1 bg-green-500 text-white px-3 py-1 rounded-full text-xs font-bold shadow-md transform hover:scale-105 transition-transform">
-                      📝 Green Button
+                    <span className="inline-flex items-center gap-1 bg-purple-500 text-white px-3 py-1 rounded-full text-xs font-bold shadow-md transform hover:scale-105 transition-transform">
+                      📝 Lyrics Button
                     </span>{" "}
                     next to each song to add lyrics manually
                   </p>

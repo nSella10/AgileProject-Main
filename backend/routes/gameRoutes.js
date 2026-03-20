@@ -9,10 +9,16 @@ import {
   getAnalytics,
   updateLyricsForExistingGames,
   fetchSongLyrics,
+  getPublicGames,
 } from "../controllers/gameController.js";
 import { protect } from "../middlewares/authMiddleware.js";
 
 const router = express.Router();
+
+// @desc    Get public games for online lobby (no auth)
+// @route   GET /api/games/public
+// @access  Public
+router.get("/public", getPublicGames);
 
 // @desc    Create a new game (with song data)
 // @route   POST /api/games

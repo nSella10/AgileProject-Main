@@ -9,6 +9,7 @@ import {
   FaPlay,
   FaTimes,
   FaCheck,
+  FaGlobe,
 } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -161,8 +162,8 @@ const MyGames = () => {
                     <span
                       className={`px-3 py-1 rounded-full text-sm font-semibold ${
                         game.isPublic
-                          ? "bg-green-100 text-green-800"
-                          : "bg-purple-100 text-purple-800"
+                          ? "bg-purple-100 text-purple-800"
+                          : "bg-gray-100 text-gray-700"
                       }`}
                     >
                       {game.isPublic ? "🌍 Public" : "🔒 Private"}
@@ -186,7 +187,7 @@ const MyGames = () => {
                   <div className="flex gap-3">
                     <button
                       onClick={() => handleEditClick(game._id)}
-                      className="flex-1 bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-4 rounded-2xl transition-all duration-300 flex items-center justify-center gap-2 text-sm"
+                      className="flex-1 bg-purple-500 hover:bg-purple-600 text-white font-semibold py-3 px-4 rounded-2xl transition-all duration-300 flex items-center justify-center gap-2 text-sm"
                     >
                       <FaEdit />
                       Edit
@@ -205,6 +206,22 @@ const MyGames = () => {
                       <FaPlay />
                       Play
                     </button>
+                  </div>
+
+                  {/* Online Availability Toggle */}
+                  <div className="mt-2">
+                    <span
+                      className={`inline-flex items-center gap-1 text-xs px-3 py-1 rounded-full ${
+                        game.isPublic
+                          ? "bg-purple-500 bg-opacity-20 text-purple-300 border border-purple-500 border-opacity-30"
+                          : "bg-gray-500 bg-opacity-20 text-gray-400 border border-gray-500 border-opacity-30"
+                      }`}
+                    >
+                      <FaGlobe />
+                      {game.isPublic
+                        ? "Available in Online Lobby"
+                        : "Not available online (set Public to enable)"}
+                    </span>
                   </div>
                 </div>
               ))}

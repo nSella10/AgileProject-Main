@@ -4,6 +4,7 @@ import {
   analyzeAnswer,
   getAnswerTypeMessage,
 } from "../utils/answerMatching.js";
+import { onlineFinishRound } from "./onlineLobbyEvents.js";
 
 const ROUND_DURATIONS = [1000, 2000, 3000, 4000, 5000]; // 1s, 2s, 3s, 4s, 5s - יותר מאתגר!
 
@@ -95,17 +96,19 @@ export function handleGameEvents(io, socket) {
         answerTime: answerTime,
       };
 
-      // שליחת עדכון למארגן על תשובה שהתקבלה
+      // שליחת עדכון למארגן על תשובה שהתקבלה (local mode only)
       const connectedPlayersCount = room.players.filter(
         (p) => p.status !== "disconnected"
       ).length;
-      io.to(room.hostSocketId).emit("playerAnswered", {
-        username,
-        correct: answerResult.isCorrect,
-        answerType: answerResult.type,
-        totalAnswered: room.guessedUsers.size,
-        totalPlayers: connectedPlayersCount,
-      });
+      if (!room.isOnline && room.hostSocketId) {
+        io.to(room.hostSocketId).emit("playerAnswered", {
+          username,
+          correct: answerResult.isCorrect,
+          answerType: answerResult.type,
+          totalAnswered: room.guessedUsers.size,
+          totalPlayers: connectedPlayersCount,
+        });
+      }
 
       if (answerResult.isCorrect) {
         room.correctUsers.add(username);
@@ -152,29 +155,34 @@ export function handleGameEvents(io, socket) {
           clearTimeout(room.currentTimeout);
         }
 
-        // שליחת אירוע למארגן לעצור את הטיימר שלו
-        io.to(room.hostSocketId).emit("allPlayersAnswered");
-
-        // אם אף אחד לא צדק, נשלח למארגן אפשרות לבחור
-        if (room.correctUsers.size === 0) {
-          // בדיקה אם יש עוד סיבובים זמינים
-          if (room.currentRound < ROUND_DURATIONS.length) {
-            console.log(
-              `🎯 All players guessed incorrectly, asking host for decision`
-            );
-            // שליחת אירוע למארגן לבחור אם להמשיך לסניפט ארוך יותר
-            io.to(room.hostSocketId).emit("roundFailedAwaitingDecision", {
-              songNumber: room.currentSongIndex + 1,
-              totalSongs: room.songs.length,
-              canReplayLonger: true,
-            });
+        if (room.isOnline) {
+          // Online mode: server handles everything automatically
+          if (room.correctUsers.size === 0) {
+            onlineFinishRound(io, roomCode);
           } else {
-            console.log(`🎯 All rounds used, finishing round`);
-            finishRound(io, roomCode);
+            onlineFinishRound(io, roomCode);
           }
         } else {
-          // אם מישהו צדק, נסיים את הסיבוב
-          finishRound(io, roomCode);
+          // Local mode: notify host
+          io.to(room.hostSocketId).emit("allPlayersAnswered");
+
+          if (room.correctUsers.size === 0) {
+            if (room.currentRound < ROUND_DURATIONS.length) {
+              console.log(
+                `🎯 All players guessed incorrectly, asking host for decision`
+              );
+              io.to(room.hostSocketId).emit("roundFailedAwaitingDecision", {
+                songNumber: room.currentSongIndex + 1,
+                totalSongs: room.songs.length,
+                canReplayLonger: true,
+              });
+            } else {
+              console.log(`🎯 All rounds used, finishing round`);
+              finishRound(io, roomCode);
+            }
+          } else {
+            finishRound(io, roomCode);
+          }
         }
       }
     } catch (error) {
@@ -199,17 +207,19 @@ export function handleGameEvents(io, socket) {
         answerTime: answerTime,
       };
 
-      // שליחת עדכון למארגן על תשובה שהתקבלה
+      // שליחת עדכון למארגן על תשובה שהתקבלה (local mode only)
       const connectedPlayersCount = room.players.filter(
         (p) => p.status !== "disconnected"
       ).length;
-      io.to(room.hostSocketId).emit("playerAnswered", {
-        username,
-        correct: false,
-        answerType: "none",
-        totalAnswered: room.guessedUsers.size,
-        totalPlayers: connectedPlayersCount,
-      });
+      if (!room.isOnline && room.hostSocketId) {
+        io.to(room.hostSocketId).emit("playerAnswered", {
+          username,
+          correct: false,
+          answerType: "none",
+          totalAnswered: room.guessedUsers.size,
+          totalPlayers: connectedPlayersCount,
+        });
+      }
 
       // שליחת תגובה לשחקן
       io.to(socket.id).emit("answerFeedback", {
@@ -222,34 +232,32 @@ export function handleGameEvents(io, socket) {
         (p) => p.status !== "disconnected"
       ).length;
       if (room.guessedUsers.size === connectedPlayersCount2) {
-        // ביטול הטיימר הנוכחי
         if (room.currentTimeout) {
           clearTimeout(room.currentTimeout);
         }
 
-        // שליחת אירוע למארגן לעצור את הטיימר שלו
-        io.to(room.hostSocketId).emit("allPlayersAnswered");
+        if (room.isOnline) {
+          onlineFinishRound(io, roomCode);
+        } else {
+          io.to(room.hostSocketId).emit("allPlayersAnswered");
 
-        // אם אף אחד לא צדק, נשלח למארגן אפשרות לבחור
-        if (room.correctUsers.size === 0) {
-          // בדיקה אם יש עוד סיבובים זמינים
-          if (room.currentRound < ROUND_DURATIONS.length) {
-            console.log(
-              `🎯 All players guessed incorrectly (with error), asking host for decision`
-            );
-            // שליחת אירוע למארגן לבחור אם להמשיך לסניפט ארוך יותר
-            io.to(room.hostSocketId).emit("roundFailedAwaitingDecision", {
-              songNumber: room.currentSongIndex + 1,
-              totalSongs: room.songs.length,
-              canReplayLonger: true,
-            });
+          if (room.correctUsers.size === 0) {
+            if (room.currentRound < ROUND_DURATIONS.length) {
+              console.log(
+                `🎯 All players guessed incorrectly (with error), asking host for decision`
+              );
+              io.to(room.hostSocketId).emit("roundFailedAwaitingDecision", {
+                songNumber: room.currentSongIndex + 1,
+                totalSongs: room.songs.length,
+                canReplayLonger: true,
+              });
+            } else {
+              console.log(`🎯 All rounds used (with error), finishing round`);
+              finishRound(io, roomCode);
+            }
           } else {
-            console.log(`🎯 All rounds used (with error), finishing round`);
             finishRound(io, roomCode);
           }
-        } else {
-          // אם מישהו צדק, נסיים את הסיבוב
-          finishRound(io, roomCode);
         }
       }
     }
@@ -272,52 +280,51 @@ export function handleGameEvents(io, socket) {
       skipped: true,
     });
 
-    // שליחת עדכון למארגן
+    // שליחת עדכון למארגן (local mode only)
     const connectedPlayersCount = room.players.filter(
       (p) => p.status !== "disconnected"
     ).length;
-    io.to(room.hostSocketId).emit("playerAnswered", {
-      username,
-      correct: false,
-      skipped: true,
-      totalAnswered: room.guessedUsers.size,
-      totalPlayers: connectedPlayersCount,
-    });
+    if (!room.isOnline && room.hostSocketId) {
+      io.to(room.hostSocketId).emit("playerAnswered", {
+        username,
+        correct: false,
+        skipped: true,
+        totalAnswered: room.guessedUsers.size,
+        totalPlayers: connectedPlayersCount,
+      });
+    }
 
     // בדיקה אם כל השחקנים המחוברים ניחשו או וויתרו
-    // אם כולם טעו/וויתרו (אף אחד לא צדק), נמשיך לסניפט הבא
     const connectedPlayersCount3 = room.players.filter(
       (p) => p.status !== "disconnected"
     ).length;
     if (room.guessedUsers.size === connectedPlayersCount3) {
-      // ביטול הטיימר הנוכחי
       if (room.currentTimeout) {
         clearTimeout(room.currentTimeout);
       }
 
-      // שליחת אירוע למארגן לעצור את הטיימר שלו
-      io.to(room.hostSocketId).emit("allPlayersAnswered");
+      if (room.isOnline) {
+        onlineFinishRound(io, roomCode);
+      } else {
+        io.to(room.hostSocketId).emit("allPlayersAnswered");
 
-      // אם אף אחד לא צדק, נשלח למארגן אפשרות לבחור
-      if (room.correctUsers.size === 0) {
-        // בדיקה אם יש עוד סיבובים זמינים
-        if (room.currentRound < ROUND_DURATIONS.length) {
-          console.log(
-            `⏭️ All players guessed/skipped incorrectly, asking host for decision`
-          );
-          // שליחת אירוע למארגן לבחור אם להמשיך לסניפט ארוך יותר
-          io.to(room.hostSocketId).emit("roundFailedAwaitingDecision", {
-            songNumber: room.currentSongIndex + 1,
-            totalSongs: room.songs.length,
-            canReplayLonger: true,
-          });
+        if (room.correctUsers.size === 0) {
+          if (room.currentRound < ROUND_DURATIONS.length) {
+            console.log(
+              `⏭️ All players guessed/skipped incorrectly, asking host for decision`
+            );
+            io.to(room.hostSocketId).emit("roundFailedAwaitingDecision", {
+              songNumber: room.currentSongIndex + 1,
+              totalSongs: room.songs.length,
+              canReplayLonger: true,
+            });
+          } else {
+            console.log(`⏭️ All rounds used, finishing round`);
+            finishRound(io, roomCode);
+          }
         } else {
-          console.log(`⏭️ All rounds used, finishing round`);
           finishRound(io, roomCode);
         }
-      } else {
-        // אם מישהו צדק, נסיים את הסיבוב
-        finishRound(io, roomCode);
       }
     }
   });

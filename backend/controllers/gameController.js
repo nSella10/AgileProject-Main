@@ -659,6 +659,30 @@ export const updateLyricsForExistingGames = asyncHandler(async (req, res) => {
   }
 });
 
+// @desc    Get all public games (for online lobby)
+// @route   GET /api/games/public
+// @access  Public (no auth required)
+export const getPublicGames = asyncHandler(async (req, res) => {
+  const games = await Game.find({ isPublic: true })
+    .select("title description songs guessTimeLimit guessInputMethod createdAt")
+    .sort({ createdAt: -1 })
+    .limit(50);
+
+  const gamesWithInfo = games
+    .filter((game) => game.songs && game.songs.length > 0)
+    .map((game) => ({
+      _id: game._id,
+      title: game.title,
+      description: game.description,
+      songCount: game.songs.length,
+      guessTimeLimit: game.guessTimeLimit,
+      guessInputMethod: game.guessInputMethod,
+      createdAt: game.createdAt,
+    }));
+
+  res.json(gamesWithInfo);
+});
+
 // @desc    Fetch lyrics for a specific song
 // @route   POST /api/games/fetch-lyrics
 // @access  Private

@@ -1,6 +1,8 @@
 import handleRoomEvents from "./roomEvents.js";
 import { handlePlayerEvents } from "./playerEvents.js";
 import { handleGameEvents } from "./gameEvents.js";
+import { handleOnlineLobbyEvents, handleOnlinePlayerLeave, broadcastLobbyUpdate } from "./onlineLobbyEvents.js";
+import { handlePresenceEvents, handlePresenceDisconnect, setPresence } from "./presenceEvents.js";
 import rooms from "../sockets/roomStore.js";
 
 const socketManager = (io) => {
@@ -13,21 +15,38 @@ const socketManager = (io) => {
     handleRoomEvents(io, socket);
     handlePlayerEvents(io, socket);
     handleGameEvents(io, socket);
+    handleOnlineLobbyEvents(io, socket);
+    handlePresenceEvents(io, socket);
 
     socket.on("disconnect", () => {
+      handlePresenceDisconnect(io, socket);
       console.log(`❌ Client disconnected: ${socket.id}`);
 
-      // בדיקה אם זה מארגן שהתנתק
+      // Check if this socket is in an online room
+      for (const [roomCode, room] of rooms.entries()) {
+        if (room.isOnline) {
+          const onlinePlayer = room.players.find((p) => p.socketId === socket.id);
+          if (onlinePlayer) {
+            console.log(`🌐 Online player ${onlinePlayer.username} disconnected from room ${roomCode}`);
+            handleOnlinePlayerLeave(io, socket, roomCode);
+            return;
+          }
+        }
+      }
+
+      // בדיקה אם זה מארגן שהתנתק (local mode only)
       for (const [code, room] of rooms.entries()) {
-        if (room.hostSocketId === socket.id) {
+        if (!room.isOnline && room.hostSocketId === socket.id) {
           console.log(`🧹 Cleaning up room ${code} (host disconnected)`);
           rooms.delete(code);
           return;
         }
       }
 
-      // בדיקה אם זה משתתף שהתנתק
+      // בדיקה אם זה משתתף שהתנתק (local mode)
       for (const [roomCode, room] of rooms.entries()) {
+        if (room.isOnline) continue; // Already handled above
+
         const disconnectedPlayer = room.players.find(
           (p) => p.socketId === socket.id
         );
