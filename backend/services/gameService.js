@@ -1,6 +1,8 @@
 import Game from "../models/Game.js";
 import { fetchLyricsFromGenius } from "./lyricsService.js";
 import { extractKeywordsFromLyrics } from "./lyricsDatabaseService.js";
+import { normalizeArtistName } from "../utils/artistNormalization.js";
+import { cleanSongTitle, normalizeSongTitle } from "../utils/songNormalization.js";
 
 /**
  * Reusable game business logic, extracted from gameController.
@@ -9,13 +11,14 @@ import { extractKeywordsFromLyrics } from "./lyricsDatabaseService.js";
 
 // Validate and normalize a song object for storage
 function normalizeSong(song) {
+  const cleanedTitle = normalizeSongTitle(cleanSongTitle(song.title)) || "Unknown Title";
   return {
-    title: song.title || "Unknown Title",
-    correctAnswer: song.correctAnswer || song.title || "Unknown Title",
+    title: cleanedTitle,
+    correctAnswer: song.correctAnswer || cleanedTitle,
     correctAnswers: song.correctAnswers || [
-      song.correctAnswer || song.title || "Unknown Title",
+      song.correctAnswer || cleanedTitle,
     ],
-    artist: song.artist || "Unknown Artist",
+    artist: normalizeArtistName(song.artist) || "Unknown Artist",
     previewUrl: song.previewUrl || "",
     artworkUrl: song.artworkUrl || "",
     trackId: song.trackId || "",
@@ -191,8 +194,8 @@ export async function searchSongsFromiTunes(term) {
   const data = await response.json();
   return data.results.map((r) => ({
     trackId: String(r.trackId),
-    title: r.trackName,
-    artist: r.artistName,
+    title: normalizeSongTitle(cleanSongTitle(r.trackName)),
+    artist: normalizeArtistName(r.artistName),
     previewUrl: r.previewUrl || "",
     artworkUrl: r.artworkUrl100 || r.artworkUrl60 || "",
   }));

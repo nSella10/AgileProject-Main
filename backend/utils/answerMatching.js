@@ -1,5 +1,6 @@
 import stringSimilarity from "string-similarity";
 import Fuse from "fuse.js";
+import { englishToHebrew } from "./artistNormalization.js";
 
 /**
  * מחזיר את סוג התשובה והניקוד בהתאם לתשובה שהמשתמש נתן
@@ -222,60 +223,30 @@ async function checkArtist(userAnswer, song) {
 function generateArtistVariations(artistName) {
   const variations = [artistName];
 
-  // מיפוי שמות נפוצים מאנגלית לעברית
-  const nameMapping = {
-    "danny sanderson": ["דני סנדרסון", "דני סנדרסון", "דנני סנדרסון"],
-    "shlomo artzi": ["שלמה ארצי", "שלמה ארצי"],
-    rita: ["ריטה"],
-    "shalom hanoch": ["שלום חנוך", "שלום חנוך"],
-    "arik einstein": ["אריק איינשטיין", "אריק איינשטיין"],
-    "matti caspi": ["מתי כספי", "מתי כספי", "מטי כספי"],
-    "yehudit ravitz": ["יהודית רביץ", "יהודית רביץ"],
-    "david broza": ["דוד ברוזה", "דוד ברוזה"],
-    "chava alberstein": ["חוה אלברשטיין", "חוה אלברשטיין"],
-    "naomi shemer": ["נעמי שמר"],
-    "ehud banai": ["אהוד בנאי"],
-    "berry sakharof": ["ברי סחרוף", "ברי סחרוף"],
-    "ofra haza": ["עפרה חזה", "עפרה חזרה", "עופרה חזה", "עופרה חזרה"],
-    "riki gal": ["ריקי גל", "ריקי גל"],
-    "zohar argov": ["זוהר ארגוב", "זוהר ארגב"],
-    "yossi banai": ["יוסי בנאי"],
-    "gidi gov": ["גידי גוב", "גידי גב"],
-    "boaz sharabi": ["בועז שרעבי"],
-    "yehuda poliker": ["יהודה פוליקר"],
-    "rami kleinstein": ["רמי קליינשטיין"],
-    "corinne allal": ["קורין אלאל"],
-    "margalit tzan'ani": ["מרגלית צנעני"],
-    "yardena arazi": ["ירדנה ארזי"],
-    ilanit: ["אילנית"],
-    daklon: ["דקלון"],
-    "svika pick": ["צביקה פיק"],
-    "mike brant": ["מייק בראנט"],
-    "tzvika hadar": ["צביקה הדר"],
-    mashina: ["משינה", "מאשינה"],
-    kaveret: ["כוורת"],
-    typex: ["טייפקס"],
-    teapacks: ["טיפקס", "טי פקס"],
-    subliminal: ["סאבלימינל"],
-    "infected mushroom": ["אינפקטד מאשרום"],
-    "asaf avidan": ["אסף אבידן"],
-    "idan raichel": ["עידן רייכל"],
-    "ninet tayeb": ["נינט טייב", "נינט"],
-    "static & ben el": ["סטטיק ובן אל", "סטטיק בן אל"],
-    "eden ben zaken": ["עדן בן זקן"],
-    "noa kirel": ["נועה קירל"],
-    "omer adam": ["עומר אדם"],
-    "sarit hadad": ["שרית חדד"],
-    "eyal golan": ["אייל גולן"],
-    mizrahi: ["מזרחי"],
-    "the shadow": ["הצל"],
-    "hadag nahash": ["הדג נחש"],
-    "monica sex": ["מוניקה סקס"],
-    "jane bordeaux": ["ג'יין בורדו", "ג'יין בורדו"],
-    "red band": ["רד בנד"],
-    rockfour: ["רוקפור"],
-    monica: ["מוניקה"],
+  // Build variations map from the shared normalization mapping.
+  // answerMatching needs arrays of alternate spellings, so we build that from englishToHebrew.
+  // Extra typo/spelling variations are added inline where needed.
+  const nameMapping = {};
+  for (const [eng, heb] of Object.entries(englishToHebrew)) {
+    nameMapping[eng] = [heb];
+  }
+  // Additional spelling variations for answer matching (typos, alternate transliterations)
+  const extraVariations = {
+    "danny sanderson": ["דנני סנדרסון"],
+    "matti caspi": ["מטי כספי"],
+    "ofra haza": ["עפרה חזרה", "עופרה חזה", "עופרה חזרה"],
+    "zohar argov": ["זוהר ארגב"],
+    "gidi gov": ["גידי גב"],
+    mashina: ["מאשינה"],
+    teapacks: ["טי פקס"],
+    "ninet tayeb": ["נינט"],
+    "static & ben el": ["סטטיק בן אל"],
   };
+  for (const [eng, extras] of Object.entries(extraVariations)) {
+    if (nameMapping[eng]) {
+      nameMapping[eng].push(...extras);
+    }
+  }
 
   const normalizedArtist = artistName.toLowerCase().trim();
 

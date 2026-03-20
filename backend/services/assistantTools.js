@@ -1,4 +1,10 @@
 import * as gameService from "./gameService.js";
+import { normalizeArtistName } from "../utils/artistNormalization.js";
+import {
+  isHebrewContent,
+  containsHebrew,
+  deriveGameDescription,
+} from "../utils/songNormalization.js";
 
 /**
  * Tool definitions for OpenAI function calling.
@@ -59,30 +65,34 @@ export const toolDefinitions = [
     function: {
       name: "createGame",
       description:
-        "Create a new music guessing game. Songs MUST come from searchSongs results with real trackId, previewUrl, etc. Never invent song data.",
+        "Create a new music guessing game. Songs MUST come from searchSongs results. All settings have sensible defaults — only provide values the user explicitly requested. If title is omitted, the system auto-generates one from the songs.",
       parameters: {
         type: "object",
         properties: {
-          title: { type: "string", description: "Game title" },
-          description: { type: "string", description: "Game description" },
+          title: {
+            type: "string",
+            description:
+              "Game title. Infer from the request context (artist name, theme, etc.). If unsure, omit and the system will auto-generate.",
+          },
+          description: { type: "string", description: "Game description. If omitted, auto-generated from the title and songs." },
           isPublic: {
             type: "boolean",
-            description: "Whether the game is public (default false)",
+            description: "Whether the game is public (default: true)",
           },
           guessTimeLimit: {
             type: "number",
             enum: [15, 30, 45, 60],
-            description: "Seconds allowed per guess (default 30)",
+            description: "Seconds allowed per guess (default: 30)",
           },
           guessInputMethod: {
             type: "string",
             enum: ["freeText", "letterClick"],
-            description: "How players input guesses (default freeText)",
+            description: "How players input guesses (default: freeText)",
           },
           songs: {
             type: "array",
             description:
-              "Array of songs from searchSongs results. Each must have title, artist, trackId, previewUrl, artworkUrl.",
+              "Array of songs from searchSongs results. Each must have title and artist.",
             items: {
               type: "object",
               properties: {
@@ -92,11 +102,11 @@ export const toolDefinitions = [
                 previewUrl: { type: "string" },
                 artworkUrl: { type: "string" },
               },
-              required: ["title", "artist", "trackId", "previewUrl"],
+              required: ["title", "artist"],
             },
           },
         },
-        required: ["title", "songs"],
+        required: ["songs"],
       },
     },
   },
@@ -228,7 +238,13 @@ export function isDestructive(toolName) {
  * Execute a tool call with the authenticated user's ID.
  * All operations go through gameService which enforces ownership checks.
  */
-export async function executeTool(userId, toolName, args) {
+/**
+ * @param {string} userId
+ * @param {string} toolName
+ * @param {object} args
+ * @param {Array} searchCache - cached search results from prior searchSongs calls in this conversation turn
+ */
+export async function executeTool(userId, toolName, args, searchCache = []) {
   switch (toolName) {
     case "listMyGames": {
       const games = await gameService.listGamesForUser(userId);
@@ -269,12 +285,21 @@ export async function executeTool(userId, toolName, args) {
     }
 
     case "createGame": {
-      // Validate that songs have real trackIds (not hallucinated)
+      // Auto-enrich songs from search cache if LLM only provided title/artist
+      args.songs = enrichSongsFromCache(args.songs, searchCache);
       validateSongsHaveRealData(args.songs);
+
+      // Auto-generate title if not provided; normalize LLM-provided titles for Hebrew content
+      let title = args.title || deriveTitleFromSongs(args.songs);
+      title = localizeGameTitle(title, args.songs);
+
+      // Auto-generate description if not provided
+      const description = args.description || deriveGameDescription(title, args.songs);
+
       const game = await gameService.createGame(userId, {
-        title: args.title,
-        description: args.description || "",
-        isPublic: args.isPublic ?? false,
+        title,
+        description,
+        isPublic: args.isPublic ?? true,
         guessTimeLimit: args.guessTimeLimit || 30,
         guessInputMethod: args.guessInputMethod || "freeText",
         songs: args.songs,
@@ -310,6 +335,7 @@ export async function executeTool(userId, toolName, args) {
     }
 
     case "addSongsToGame": {
+      args.songs = enrichSongsFromCache(args.songs, searchCache);
       validateSongsHaveRealData(args.songs);
       const game = await gameService.addSongsToGame(userId, args.gameId, args.songs);
       return {
@@ -353,6 +379,127 @@ export async function executeTool(userId, toolName, args) {
 }
 
 // ─── Validation Helpers ───
+
+/**
+ * Derive a game title from the songs list when no title was provided.
+ * Strategy: if most songs share the same artist, use the artist name.
+ * Falls back to a Hebrew or English generic title based on content.
+ */
+function deriveTitleFromSongs(songs) {
+  if (!songs || songs.length === 0) return "Music Quiz";
+
+  const hebrew = isHebrewContent(songs);
+
+  // Count artist frequency
+  const artistCounts = {};
+  for (const song of songs) {
+    const artist = (song.artist || "").trim();
+    if (artist && artist !== "Unknown Artist") {
+      artistCounts[artist] = (artistCounts[artist] || 0) + 1;
+    }
+  }
+
+  // Find the most common artist
+  let topArtist = null;
+  let topCount = 0;
+  for (const [artist, count] of Object.entries(artistCounts)) {
+    if (count > topCount) {
+      topArtist = artist;
+      topCount = count;
+    }
+  }
+
+  // If a single artist covers majority of songs, use their name
+  if (topArtist && topCount >= songs.length * 0.5) {
+    return topArtist;
+  }
+
+  // If there are a few artists, create a "Mix" title
+  const uniqueArtists = Object.keys(artistCounts);
+  if (uniqueArtists.length <= 3 && uniqueArtists.length > 0) {
+    return uniqueArtists.join(" & ");
+  }
+
+  return hebrew ? "מיקס שירים" : "Music Quiz";
+}
+
+/**
+ * If the LLM provided an English title but the songs are Hebrew-oriented,
+ * try to localize it. Also normalizes known English artist names used as titles.
+ */
+function localizeGameTitle(title, songs) {
+  if (!title) return title;
+
+  // If title is already in Hebrew, keep it
+  if (containsHebrew(title)) return title;
+
+  // Try to normalize as an artist name (e.g., "Kaveret" → "כוורת")
+  const normalized = normalizeArtistName(title);
+  if (normalized !== title) return normalized;
+
+  // If content is Hebrew but title is English, check for common theme words
+  if (isHebrewContent(songs)) {
+    const lower = title.toLowerCase().trim();
+    // Common English theme titles → Hebrew equivalents
+    const themeMap = {
+      "music quiz": "מיקס שירים",
+      "pop hits": "להיטי פופ",
+      "rock hits": "להיטי רוק",
+      "80s hits": "להיטי שנות ה-80",
+      "90s hits": "להיטי שנות ה-90",
+      "2000s hits": "להיטי שנות ה-2000",
+      "children's songs": "שירי ילדים",
+      "kids songs": "שירי ילדים",
+      "love songs": "שירי אהבה",
+      "nostalgic songs": "שירים נוסטלגיים",
+      "israeli songs": "שירים ישראליים",
+      "hebrew songs": "שירים בעברית",
+      "classic israeli": "קלאסיקות ישראליות",
+      "israeli classics": "קלאסיקות ישראליות",
+      "wedding songs": "שירי חתונה",
+      "party songs": "שירי מסיבה",
+      "summer hits": "להיטי קיץ",
+    };
+    if (themeMap[lower]) return themeMap[lower];
+  }
+
+  return title;
+}
+
+/**
+ * If the LLM only provided title/artist (because we summarized searchSongs results),
+ * look up the full song data (trackId, previewUrl, artworkUrl) from the cached search results.
+ */
+function enrichSongsFromCache(songs, searchCache) {
+  if (!songs || !Array.isArray(songs) || searchCache.length === 0) return songs;
+
+  return songs.map((song) => {
+    // Already has full data — no enrichment needed
+    if (song.trackId && song.previewUrl) return song;
+
+    // Try to find a match in the search cache by title (case-insensitive)
+    const normalizedTitle = (song.title || "").toLowerCase().trim();
+    const normalizedArtist = (song.artist || "").toLowerCase().trim();
+
+    const match = searchCache.find((cached) => {
+      const ct = (cached.title || "").toLowerCase().trim();
+      const ca = (cached.artist || "").toLowerCase().trim();
+      // Match by title, or title+artist
+      return ct === normalizedTitle || (ct.includes(normalizedTitle) && ca.includes(normalizedArtist));
+    });
+
+    if (match) {
+      return {
+        ...song,
+        trackId: song.trackId || match.trackId,
+        previewUrl: song.previewUrl || match.previewUrl,
+        artworkUrl: song.artworkUrl || match.artworkUrl || "",
+      };
+    }
+
+    return song;
+  });
+}
 
 function validateSongsHaveRealData(songs) {
   if (!songs || !Array.isArray(songs) || songs.length === 0) {

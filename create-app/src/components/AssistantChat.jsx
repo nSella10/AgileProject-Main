@@ -1,32 +1,111 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
-import { useSelector } from "react-redux";
-import { FaTimes, FaPaperPlane, FaRobot, FaUser, FaCheck, FaBan } from "react-icons/fa";
+import { useSelector, useDispatch } from "react-redux";
+import { FaTimes, FaPaperPlane, FaRobot, FaUser, FaCheck, FaBan, FaTrash } from "react-icons/fa";
 import {
   useAssistantChatMutation,
   useAssistantConfirmMutation,
 } from "../slices/assistantApiSlice";
 import { useAssistantContext } from "../context/AssistantContext";
+import { invalidateCache, setCurrentGame } from "../slices/gamesSlice";
+
+// ─── LocalStorage persistence ───
+
+const STORAGE_KEY = "guessify_assistant_chat";
+const MAX_STORED_MESSAGES = 50;
+
+const WELCOME_MESSAGE = {
+  role: "assistant",
+  content:
+    "Hi! I'm the Guessify AI Assistant. I can help you create games, manage songs, and answer questions about your games. How can I help?",
+};
+
+function loadPersistedState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    // Basic shape validation
+    if (
+      typeof parsed !== "object" ||
+      !Array.isArray(parsed.messages)
+    ) {
+      return null;
+    }
+    return {
+      isOpen: !!parsed.isOpen,
+      messages: parsed.messages
+        .filter(
+          (m) =>
+            m &&
+            typeof m.content === "string" &&
+            (m.role === "user" || m.role === "assistant")
+        )
+        .slice(-MAX_STORED_MESSAGES),
+      // Do NOT restore pendingConfirmation — destructive actions must not persist
+    };
+  } catch {
+    return null;
+  }
+}
+
+function persistState(isOpen, messages) {
+  try {
+    const toStore = {
+      isOpen,
+      messages: messages
+        .filter((m) => m.role === "user" || m.role === "assistant")
+        .map((m) => ({ role: m.role, content: m.content }))
+        .slice(-MAX_STORED_MESSAGES),
+    };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(toStore));
+  } catch {
+    // Storage full or unavailable — silently ignore
+  }
+}
+
+// ─── Tools that mutate game data ───
+
+const MUTATING_TOOLS = new Set([
+  "createGame",
+  "renameGame",
+  "updateGameSettings",
+  "addSongsToGame",
+  "removeSongFromGame",
+  "deleteGame",
+]);
+
+function hasMutatingToolResult(toolResults) {
+  return toolResults?.some((tr) => MUTATING_TOOLS.has(tr.tool));
+}
+
+// ─── Component ───
 
 const AssistantChat = () => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState([
-    {
-      role: "assistant",
-      content:
-        "Hi! I'm the Guessify AI Assistant. I can help you create games, manage songs, and answer questions about your games. How can I help?",
-    },
-  ]);
+  const persisted = useRef(loadPersistedState()).current;
+
+  const [isOpen, setIsOpen] = useState(persisted?.isOpen ?? false);
+  const [messages, setMessages] = useState(
+    persisted?.messages?.length > 0
+      ? persisted.messages
+      : [WELCOME_MESSAGE]
+  );
   const [input, setInput] = useState("");
   const [pendingConfirmation, setPendingConfirmation] = useState(null);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
 
+  const dispatch = useDispatch();
   const { userInfo } = useSelector((state) => state.auth);
   const { pageContext } = useAssistantContext();
 
   const [sendMessage, { isLoading: isSending }] = useAssistantChatMutation();
   const [confirmAction, { isLoading: isConfirming }] =
     useAssistantConfirmMutation();
+
+  // Persist state when it changes
+  useEffect(() => {
+    persistState(isOpen, messages);
+  }, [isOpen, messages]);
 
   // Auto-scroll to bottom
   useEffect(() => {
@@ -39,6 +118,14 @@ const AssistantChat = () => {
       setTimeout(() => inputRef.current?.focus(), 100);
     }
   }, [isOpen]);
+
+  // Force UI refresh after assistant mutations
+  const handleMutationComplete = useCallback(() => {
+    // Clear the Redux freshness cache so useGamesWithState/useGameWithState refetch
+    dispatch(invalidateCache());
+    // Clear currentGame so EditGamePage refetches fresh data
+    dispatch(setCurrentGame(null));
+  }, [dispatch]);
 
   // Build conversation history for the API (only user/assistant text messages)
   const getConversationHistory = useCallback(() => {
@@ -69,6 +156,11 @@ const AssistantChat = () => {
 
       if (result.pendingConfirmation) {
         setPendingConfirmation(result.pendingConfirmation);
+      }
+
+      // If assistant performed game mutations, force UI to refresh
+      if (hasMutatingToolResult(result.toolResults)) {
+        handleMutationComplete();
       }
     } catch (error) {
       setMessages((prev) => [
@@ -103,6 +195,9 @@ const AssistantChat = () => {
         },
       ]);
       setPendingConfirmation(null);
+
+      // Destructive actions always mutate — force UI refresh
+      handleMutationComplete();
     } catch (error) {
       setMessages((prev) => [
         ...prev,
@@ -122,6 +217,11 @@ const AssistantChat = () => {
       ...prev,
       { role: "assistant", content: "Action cancelled. No changes were made." },
     ]);
+    setPendingConfirmation(null);
+  };
+
+  const handleClearChat = () => {
+    setMessages([WELCOME_MESSAGE]);
     setPendingConfirmation(null);
   };
 
@@ -167,12 +267,21 @@ const AssistantChat = () => {
                 </p>
               </div>
             </div>
-            <button
-              onClick={() => setIsOpen(false)}
-              className="text-white/80 hover:text-white transition-colors p-1"
-            >
-              <FaTimes />
-            </button>
+            <div className="flex items-center gap-1">
+              <button
+                onClick={handleClearChat}
+                className="text-white/60 hover:text-white transition-colors p-1"
+                title="Clear chat"
+              >
+                <FaTrash className="text-xs" />
+              </button>
+              <button
+                onClick={() => setIsOpen(false)}
+                className="text-white/80 hover:text-white transition-colors p-1"
+              >
+                <FaTimes />
+              </button>
+            </div>
           </div>
 
           {/* Messages */}
@@ -190,7 +299,7 @@ const AssistantChat = () => {
                   </div>
                 )}
                 <div
-                  className={`max-w-[80%] rounded-2xl px-3 py-2 text-sm leading-relaxed ${
+                  className={`max-w-[80%] rounded-2xl px-3 py-2 text-sm leading-relaxed overflow-hidden ${
                     msg.role === "user"
                       ? "bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-br-md"
                       : msg.isError
@@ -198,7 +307,7 @@ const AssistantChat = () => {
                       : "bg-white text-gray-800 shadow-sm border border-gray-100 rounded-bl-md"
                   }`}
                 >
-                  <p className="whitespace-pre-wrap">{msg.content}</p>
+                  <p className="whitespace-pre-wrap break-words" style={{ overflowWrap: "anywhere" }}>{msg.content}</p>
                 </div>
                 {msg.role === "user" && (
                   <div className="bg-gray-200 rounded-full w-7 h-7 flex items-center justify-center shrink-0 mt-0.5">

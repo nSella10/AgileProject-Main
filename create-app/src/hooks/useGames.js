@@ -86,9 +86,10 @@ export const useGameWithState = (gameId) => {
   const dispatch = useDispatch();
   const currentGame = useSelector(selectCurrentGame);
   const gameFromState = useSelector(selectGameById(gameId));
+  const isDataFresh = useSelector(selectIsDataFresh);
 
-  // Use game from state if available and fresh, otherwise fetch
-  const shouldSkip = gameFromState && (!gameId || gameFromState._id === gameId);
+  // Only skip fetch if we have cached data AND it's still fresh
+  const shouldSkip = isDataFresh && gameFromState && (!gameId || gameFromState._id === gameId);
 
   const {
     data: apiGame,

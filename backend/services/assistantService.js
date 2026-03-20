@@ -34,6 +34,29 @@ CRITICAL RULES:
 5. If the user references "this game" or "the current game", use the page context provided below.
 6. You can respond in the same language the user writes in (Hebrew or English).
 
+RESPONSE FORMATTING RULES (VERY IMPORTANT):
+- You are talking to a normal product user, NOT a developer. Keep responses clean and friendly.
+- NEVER show URLs (previewUrl, artworkUrl, or any link) in your responses unless the user explicitly asks for them.
+- NEVER show trackId, internal IDs, or any technical metadata in your responses.
+- NEVER use markdown image syntax like ![](url) in your messages.
+- When listing songs, show ONLY the song title and artist. Use a simple numbered list. Example:
+  1. Song Title - Artist Name
+  2. Another Song - Another Artist
+- Keep song lists short. If there are more than 8 songs, show the first 6-8 and say "and X more".
+- Do NOT use excessive markdown formatting. Avoid bolding every song title. Use plain text with minimal formatting.
+- After searching for songs, briefly summarize what you found and ask if the user wants to proceed. Do not dump all raw search data.
+- After creating a game or adding songs, give a short confirmation with the game name and song count. Do not repeat the full song list.
+
+GAME CREATION BEHAVIOR (VERY IMPORTANT):
+When the user asks to create a game, DO NOT ask follow-up questions about settings. Act immediately using these defaults:
+- title: Infer a short, natural title from the request. IMPORTANT: If the request is about Hebrew/Israeli artists or songs, ALWAYS use a Hebrew title. Examples: Kaveret songs → "כוורת". Shlomo Artzi songs → "שלמה ארצי". Children's songs → "שירי ילדים". Nostalgic Hebrew songs → "שירים נוסטלגיים". Use the Hebrew artist name, Hebrew theme, or Hebrew language keyword. Only use English titles for clearly English/international content (e.g., "Pop Hits", "Beatles").
+- description: Omit — the system auto-generates a relevant description from the title and songs. Only provide if the user explicitly specifies a custom description.
+- isPublic: true
+- guessTimeLimit: 30
+- guessInputMethod: "freeText"
+Only override a default if the user EXPLICITLY asked for a different value. Never ask "what title?", "what time limit?", "what visibility?" etc. Just proceed.
+After searching for songs, immediately call createGame — do NOT ask "should I proceed?" or "would you like me to create it?". Just create it and report the result.
+
 Game settings reference:
 - Guess time limit options: 15, 30, 45, or 60 seconds
 - Guess input methods: "freeText" (players type freely) or "letterClick" (players click letters to fill in blanks)
@@ -91,6 +114,8 @@ export async function chat(userId, message, conversationHistory, context) {
 
   const toolResults = [];
   let pendingConfirmation = null;
+  // Cache search results so songs can be auto-enriched when LLM calls createGame/addSongsToGame
+  let searchCache = [];
 
   // Tool-calling loop (max 5 iterations to prevent infinite loops)
   const MAX_ITERATIONS = 5;
@@ -157,12 +182,20 @@ export async function chat(userId, message, conversationHistory, context) {
 
       // Execute non-destructive tool
       try {
-        const result = await executeTool(userId, toolName, args);
+        const result = await executeTool(userId, toolName, args, searchCache);
         toolResults.push({ tool: toolName, result });
+
+        // Cache search results so createGame/addSongsToGame can auto-enrich songs
+        if (toolName === "searchSongs" && Array.isArray(result)) {
+          searchCache = result;
+        }
+
+        // Summarize tool results for the LLM to prevent raw data leaking into responses
+        const llmContent = summarizeToolResult(toolName, result);
         messages.push({
           role: "tool",
           tool_call_id: toolCall.id,
-          content: JSON.stringify(result),
+          content: llmContent,
         });
       } catch (error) {
         messages.push({
@@ -201,6 +234,69 @@ export async function confirmAndExecute(userId, pendingAction) {
 }
 
 // ─── Helpers ───
+
+/**
+ * Summarize tool results before feeding them to the LLM.
+ * This prevents raw technical data (URLs, trackIds) from leaking into user-facing responses.
+ * The full data is preserved in toolResults for frontend cache invalidation.
+ */
+function summarizeToolResult(toolName, result) {
+  switch (toolName) {
+    case "searchSongs": {
+      // Only send title + artist to the LLM — it doesn't need URLs to compose a response.
+      // The full data (trackId, previewUrl) is still available in toolResults for subsequent
+      // tool calls like createGame/addSongsToGame since the LLM passes those through tool args.
+      if (Array.isArray(result)) {
+        const songs = result.map((s, i) => `${i + 1}. ${s.title} - ${s.artist}`);
+        return JSON.stringify({
+          songCount: result.length,
+          songs,
+          _note: "Use these exact song titles and artists when calling createGame or addSongsToGame. The system will match them to the full search results automatically.",
+        });
+      }
+      return JSON.stringify(result);
+    }
+
+    case "listMyGames": {
+      // Strip dates and internal IDs from the summary shown to the LLM
+      if (Array.isArray(result)) {
+        const games = result.map((g) => ({
+          id: g.id,
+          title: g.title,
+          songCount: g.songCount,
+          isPublic: g.isPublic,
+          guessTimeLimit: g.guessTimeLimit,
+          guessInputMethod: g.guessInputMethod,
+        }));
+        return JSON.stringify(games);
+      }
+      return JSON.stringify(result);
+    }
+
+    case "getGameDetails": {
+      // Strip trackIds from song list
+      if (result && result.songs) {
+        return JSON.stringify({
+          id: result.id,
+          title: result.title,
+          description: result.description,
+          isPublic: result.isPublic,
+          guessTimeLimit: result.guessTimeLimit,
+          guessInputMethod: result.guessInputMethod,
+          songs: result.songs.map((s) => ({
+            title: s.title,
+            artist: s.artist,
+            hasLyrics: s.hasLyrics,
+          })),
+        });
+      }
+      return JSON.stringify(result);
+    }
+
+    default:
+      return JSON.stringify(result);
+  }
+}
 
 function buildDestructiveDescription(toolName, args) {
   switch (toolName) {
