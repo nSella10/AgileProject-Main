@@ -33,6 +33,7 @@ CRITICAL RULES:
 4. Be concise but helpful. Use short responses unless the user asks for detail.
 5. If the user references "this game" or "the current game", use the page context provided below.
 6. You can respond in the same language the user writes in (Hebrew or English).
+7. When the user refers to a game by NAME (not by ID), you MUST first call listMyGames to find the game's actual ID, then use that ID for any subsequent tool calls. NEVER pass a game name as the gameId parameter.
 
 RESPONSE FORMATTING RULES (VERY IMPORTANT):
 - You are talking to a normal product user, NOT a developer. Keep responses clean and friendly.
@@ -303,7 +304,7 @@ function buildDestructiveDescription(toolName, args) {
     case "removeSongFromGame":
       return `Remove song "${args.songIdentifier}" from the game`;
     case "deleteGame":
-      return `Delete the entire game (ID: ${args.gameId}). This cannot be undone.`;
+      return `Delete the entire game "${args.gameId}". This cannot be undone.`;
     default:
       return `Execute destructive action: ${toolName}`;
   }

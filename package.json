@@ -18,7 +18,11 @@
     "build-all": "npm run build-marketing && npm run build-create && npm run build-play",
     "build-marketing": "cd marketing-website && npm run build",
     "build-create": "cd create-app && npm run build",
-    "build-play": "cd play-app && npm run build"
+    "build-play": "cd play-app && npm run build",
+    "test:e2e": "npx playwright test",
+    "test:e2e:ui": "npx playwright test --ui",
+    "test:e2e:headed": "npx playwright test --headed",
+    "test:e2e:report": "npx playwright show-report"
   },
   "keywords": [
     "music",
@@ -32,6 +36,8 @@
   "author": "Guessify Team",
   "license": "MIT",
   "devDependencies": {
+    "@playwright/test": "^1.58.2",
+    "@types/node": "^25.5.0",
     "concurrently": "^9.1.2"
   }
 }

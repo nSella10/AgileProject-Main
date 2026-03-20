@@ -1,36 +1,52 @@
 name: Deploy play-app to S3
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - "play-app/**"
+  workflow_run:
+    workflows: ["CI – Tests"]
+    types: [completed]
+    branches: [main]
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    if: >-
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'push'
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Check if play-app changed
+        id: changes
+        run: |
+          CHANGED=$(git diff --name-only HEAD~1 HEAD -- play-app/ 2>/dev/null || echo "play-app/")
+          if [ -z "$CHANGED" ]; then
+            echo "skip=true" >> $GITHUB_OUTPUT
+          else
+            echo "skip=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Set up Node.js
+        if: steps.changes.outputs.skip != 'true'
         uses: actions/setup-node@v4
         with:
           node-version: 18
 
       - name: Install dependencies
+        if: steps.changes.outputs.skip != 'true'
         working-directory: play-app
         run: npm install
 
       - name: Build project
+        if: steps.changes.outputs.skip != 'true'
         working-directory: play-app
         env:
           CI: false
         run: npm run build
 
       - name: Configure AWS credentials
+        if: steps.changes.outputs.skip != 'true'
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -38,8 +54,10 @@ jobs:
           aws-region: us-east-1
 
       - name: Deploy to S3
+        if: steps.changes.outputs.skip != 'true'
         working-directory: play-app
         run: aws s3 sync build s3://play.guessifyapp.com --delete
 
       - name: Invalidate CloudFront cache
+        if: steps.changes.outputs.skip != 'true'
         run: aws cloudfront create-invalidation --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID_PLAY_APP }} --paths "/*"

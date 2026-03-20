@@ -1,27 +1,43 @@
 name: Deploy Backend to Elastic Beanstalk
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - "backend/**"
+  workflow_run:
+    workflows: ["CI – Tests"]
+    types: [completed]
+    branches: [main]
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    # Only deploy if CI passed AND backend files changed
+    if: >-
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'push'
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Check if backend changed
+        id: changes
+        run: |
+          # Compare with previous commit to see if backend/ was modified
+          CHANGED=$(git diff --name-only HEAD~1 HEAD -- backend/ 2>/dev/null || echo "backend/")
+          if [ -z "$CHANGED" ]; then
+            echo "skip=true" >> $GITHUB_OUTPUT
+          else
+            echo "skip=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Zip backend folder (without node_modules)
+        if: steps.changes.outputs.skip != 'true'
         run: |
           cd backend
           rm -rf node_modules
           zip -r ../backend.zip . -x "node_modules/*"
 
       - name: Deploy to Elastic Beanstalk
+        if: steps.changes.outputs.skip != 'true'
         uses: einaregilsson/beanstalk-deploy@v21
         with:
           aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}

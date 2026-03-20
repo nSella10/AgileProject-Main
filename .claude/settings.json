@@ -10,7 +10,17 @@
       "Bash(node_modules/.bin/vite build)",
       "Bash(ls node_modules/.bin/vite*)",
       "Bash(npm run build)",
-      "Bash(node -e \":*)"
+      "Bash(node -e \":*)",
+      "Read(//Users/omripeer/Documents/**)",
+      "Bash(grep -E \"\\\\.\\(js|jsx|ts|tsx\\)$\")",
+      "Bash(npm init playwright@latest -- --quiet --browser=chromium)",
+      "Bash(npm install -D @playwright/test)",
+      "Bash(npx playwright install chromium)",
+      "Read(//Users/omripeer/.nvm/versions/node/**)",
+      "Bash(brew list --versions node)",
+      "Bash(mkdir -p e2e/fixtures)",
+      "Bash(rm -f tests/example.spec.ts)",
+      "Bash(rmdir tests)"
     ]
   }
 }

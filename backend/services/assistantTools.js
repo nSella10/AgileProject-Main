@@ -232,6 +232,29 @@ export function isDestructive(toolName) {
   return DESTRUCTIVE_TOOLS.has(toolName);
 }
 
+// ─── Helpers ───
+
+/**
+ * If the provided gameId is not a valid MongoDB ObjectId, try to resolve it
+ * as a game name/title by searching the user's games.
+ */
+async function resolveGameId(userId, gameId) {
+  if (!gameId) return gameId;
+  // Valid ObjectId is a 24-character hex string
+  if (/^[0-9a-fA-F]{24}$/.test(gameId)) return gameId;
+
+  // Treat gameId as a game name — look it up
+  const games = await gameService.listGamesForUser(userId);
+  const lower = gameId.toLowerCase().trim();
+  const match = games.find((g) => g.title.toLowerCase().trim() === lower);
+  if (match) return match._id.toString();
+
+  throw Object.assign(
+    new Error(`Could not find a game named "${gameId}". Use listMyGames to see your games.`),
+    { status: 404 }
+  );
+}
+
 // ─── Tool Executor ───
 
 /**
@@ -245,6 +268,10 @@ export function isDestructive(toolName) {
  * @param {Array} searchCache - cached search results from prior searchSongs calls in this conversation turn
  */
 export async function executeTool(userId, toolName, args, searchCache = []) {
+  // Resolve game name to ID for all tools that accept gameId
+  if (args.gameId) {
+    args.gameId = await resolveGameId(userId, args.gameId);
+  }
   switch (toolName) {
     case "listMyGames": {
       const games = await gameService.listGamesForUser(userId);

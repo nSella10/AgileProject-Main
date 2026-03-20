@@ -108,3 +108,10 @@ Thumbs.db
 # Backend specific
 backend/uploads/
 backend/logs/
+
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+/playwright/.auth/
